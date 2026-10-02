@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             SetorSalaoSeeder::class,
             MesaSeeder::class,
+            CategoriaCardapioSeeder::class,
         ]);
     }
 }
