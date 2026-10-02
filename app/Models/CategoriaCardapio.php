@@ -6,6 +6,7 @@ use Database\Factories\CategoriaCardapioFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -21,6 +22,12 @@ class CategoriaCardapio extends Model
     use HasFactory;
 
     protected $table = 'categorias_cardapio';
+
+    /** @return HasMany<ItemCardapio, $this> */
+    public function itens(): HasMany
+    {
+        return $this->hasMany(ItemCardapio::class, 'categoria_cardapio_id');
+    }
 
     /** @return array<string, string> */
     protected function casts(): array

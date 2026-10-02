@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Database\Factories\ItemCardapioFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -19,6 +21,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['categoria_cardapio_id', 'nome', 'descricao', 'preco_centavos', 'imagem', 'disponivel', 'ordem'])]
 class ItemCardapio extends Model
 {
+    /** @use HasFactory<ItemCardapioFactory> */
+    use HasFactory;
+
     protected $table = 'itens_cardapio';
 
     /** @return BelongsTo<CategoriaCardapio, $this> */
