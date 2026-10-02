@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('categorias_cardapio', function (Blueprint $table) {
             $table->id();
+            $table->string('nome')->unique();
+            $table->string('descricao')->nullable();
+            $table->boolean('ativa')->default(true);
+            $table->unsignedSmallInteger('ordem')->default(0);
             $table->timestamps();
+
+            $table->index(['ativa', 'ordem']);
         });
     }
 
