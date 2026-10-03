@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -30,6 +31,12 @@ class ItemCardapio extends Model
     public function categoria(): BelongsTo
     {
         return $this->belongsTo(CategoriaCardapio::class, 'categoria_cardapio_id');
+    }
+
+    /** @return HasMany<PedidoItem, $this> */
+    public function pedidoItens(): HasMany
+    {
+        return $this->hasMany(PedidoItem::class);
     }
 
     /** @return array<string, string> */

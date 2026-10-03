@@ -1,5 +1,11 @@
-import { Form, Head } from '@inertiajs/react';
-import { Armchair, CircleDollarSign, Plus, Users, Utensils } from 'lucide-react';
+import { Form, Head, router } from '@inertiajs/react';
+import {
+    Armchair,
+    CircleDollarSign,
+    Plus,
+    Users,
+    Utensils,
+} from 'lucide-react';
 import { useState } from 'react';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -22,16 +28,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { show as verComanda } from '@/routes/comandas';
 import { store as abrirComanda } from '@/routes/comandas';
 import { store as cadastrarMesa } from '@/routes/mesas';
 import { index as salao } from '@/routes/salao';
 import { store as cadastrarSetor } from '@/routes/setores-salao';
 
-type EstadoMesa =
-    | 'livre'
-    | 'ocupada'
-    | 'reservada'
-    | 'aguardando_pagamento';
+type EstadoMesa = 'livre' | 'ocupada' | 'reservada' | 'aguardando_pagamento';
 
 type Comanda = {
     id: number;
@@ -90,9 +93,14 @@ const estilosEstado: Record<
 
 export default function SalaoIndex({ setores, permissoes }: Props) {
     const [mesaSelecionada, setMesaSelecionada] = useState<Mesa | null>(null);
-    const totalMesas = setores.reduce((total, setor) => total + setor.mesas.length, 0);
+    const totalMesas = setores.reduce(
+        (total, setor) => total + setor.mesas.length,
+        0,
+    );
     const mesasLivres = setores.reduce(
-        (total, setor) => total + setor.mesas.filter((mesa) => mesa.estado === 'livre').length,
+        (total, setor) =>
+            total +
+            setor.mesas.filter((mesa) => mesa.estado === 'livre').length,
         0,
     );
 
@@ -103,12 +111,15 @@ export default function SalaoIndex({ setores, permissoes }: Props) {
             <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
                 <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div className="grid gap-1">
-                        <p className="text-sm font-medium text-primary">Operação do salão</p>
+                        <p className="text-sm font-medium text-primary">
+                            Operação do salão
+                        </p>
                         <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
                             Mesas em tempo real
                         </h1>
                         <p className="text-sm text-muted-foreground">
-                            Acompanhe a ocupação e inicie atendimentos sem perder o contexto.
+                            Acompanhe a ocupação e inicie atendimentos sem
+                            perder o contexto.
                         </p>
                     </div>
 
@@ -121,8 +132,16 @@ export default function SalaoIndex({ setores, permissoes }: Props) {
                 </header>
 
                 <div className="grid gap-3 sm:grid-cols-3">
-                    <Resumo titulo="Mesas" valor={totalMesas} icone={<Armchair className="size-4" />} />
-                    <Resumo titulo="Livres" valor={mesasLivres} icone={<Utensils className="size-4" />} />
+                    <Resumo
+                        titulo="Mesas"
+                        valor={totalMesas}
+                        icone={<Armchair className="size-4" />}
+                    />
+                    <Resumo
+                        titulo="Livres"
+                        valor={mesasLivres}
+                        icone={<Utensils className="size-4" />}
+                    />
                     <Resumo
                         titulo="Em atendimento"
                         valor={totalMesas - mesasLivres}
@@ -137,9 +156,12 @@ export default function SalaoIndex({ setores, permissoes }: Props) {
                                 <Utensils className="size-6 text-muted-foreground" />
                             </div>
                             <div>
-                                <p className="font-medium">O salão ainda não foi configurado</p>
+                                <p className="font-medium">
+                                    O salão ainda não foi configurado
+                                </p>
                                 <p className="text-sm text-muted-foreground">
-                                    Cadastre um setor e depois adicione as mesas.
+                                    Cadastre um setor e depois adicione as
+                                    mesas.
                                 </p>
                             </div>
                         </CardContent>
@@ -150,45 +172,89 @@ export default function SalaoIndex({ setores, permissoes }: Props) {
                             <section key={setor.id} className="grid gap-3">
                                 <div className="flex items-center justify-between gap-3">
                                     <div>
-                                        <h2 className="text-lg font-semibold">{setor.nome}</h2>
+                                        <h2 className="text-lg font-semibold">
+                                            {setor.nome}
+                                        </h2>
                                         {setor.descricao && (
-                                            <p className="text-sm text-muted-foreground">{setor.descricao}</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {setor.descricao}
+                                            </p>
                                         )}
                                     </div>
-                                    <Badge variant="secondary">{setor.mesas.length} mesas</Badge>
+                                    <Badge variant="secondary">
+                                        {setor.mesas.length} mesas
+                                    </Badge>
                                 </div>
 
                                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                     {setor.mesas.map((mesa) => {
-                                        const estilo = estilosEstado[mesa.estado];
+                                        const estilo =
+                                            estilosEstado[mesa.estado];
+                                        const podeAcessar =
+                                            permissoes.abrirComanda &&
+                                            (mesa.estado === 'livre' ||
+                                                (mesa.estado === 'ocupada' &&
+                                                    mesa.comanda_ativa !==
+                                                        null));
 
                                         return (
                                             <button
                                                 key={mesa.id}
                                                 type="button"
-                                                disabled={mesa.estado !== 'livre' || !permissoes.abrirComanda}
-                                                onClick={() => setMesaSelecionada(mesa)}
+                                                disabled={!podeAcessar}
+                                                onClick={() => {
+                                                    if (
+                                                        mesa.estado === 'livre'
+                                                    ) {
+                                                        setMesaSelecionada(
+                                                            mesa,
+                                                        );
+                                                    } else if (
+                                                        mesa.comanda_ativa
+                                                    ) {
+                                                        router.visit(
+                                                            verComanda(
+                                                                mesa
+                                                                    .comanda_ativa
+                                                                    .id,
+                                                            ).url,
+                                                        );
+                                                    }
+                                                }}
                                                 className={`group rounded-xl border p-4 text-left transition ${estilo.borda} disabled:cursor-default`}
                                             >
                                                 <div className="flex items-start justify-between gap-3">
                                                     <div className="grid gap-1">
-                                                        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                                        <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                                                             Mesa
                                                         </span>
-                                                        <strong className="text-2xl">{mesa.numero}</strong>
+                                                        <strong className="text-2xl">
+                                                            {mesa.numero}
+                                                        </strong>
                                                     </div>
-                                                    <span className={`mt-1 size-2.5 rounded-full ${estilo.indicador}`} />
+                                                    <span
+                                                        className={`mt-1 size-2.5 rounded-full ${estilo.indicador}`}
+                                                    />
                                                 </div>
                                                 <div className="mt-5 flex items-center justify-between gap-2 text-sm">
                                                     <span className="flex items-center gap-1.5 text-muted-foreground">
                                                         <Users className="size-4" />
-                                                        {mesa.capacidade} lugares
+                                                        {mesa.capacidade}{' '}
+                                                        lugares
                                                     </span>
-                                                    <span className="font-medium">{estilo.rotulo}</span>
+                                                    <span className="font-medium">
+                                                        {estilo.rotulo}
+                                                    </span>
                                                 </div>
                                                 {mesa.comanda_ativa && (
                                                     <p className="mt-2 text-xs text-muted-foreground">
-                                                        Comanda #{mesa.comanda_ativa.id} · {mesa.comanda_ativa.quantidade_pessoas}{' '}
+                                                        Comanda #
+                                                        {mesa.comanda_ativa.id}{' '}
+                                                        ·{' '}
+                                                        {
+                                                            mesa.comanda_ativa
+                                                                .quantidade_pessoas
+                                                        }{' '}
                                                         pessoas
                                                     </p>
                                                 )}
@@ -202,12 +268,23 @@ export default function SalaoIndex({ setores, permissoes }: Props) {
                 )}
             </div>
 
-            <AbrirMesaDialog mesa={mesaSelecionada} onClose={() => setMesaSelecionada(null)} />
+            <AbrirMesaDialog
+                mesa={mesaSelecionada}
+                onClose={() => setMesaSelecionada(null)}
+            />
         </>
     );
 }
 
-function Resumo({ titulo, valor, icone }: { titulo: string; valor: number; icone: React.ReactNode }) {
+function Resumo({
+    titulo,
+    valor,
+    icone,
+}: {
+    titulo: string;
+    valor: number;
+    icone: React.ReactNode;
+}) {
     return (
         <Card className="py-4">
             <CardContent className="flex items-center justify-between px-4">
@@ -215,7 +292,9 @@ function Resumo({ titulo, valor, icone }: { titulo: string; valor: number; icone
                     <p className="text-sm text-muted-foreground">{titulo}</p>
                     <p className="text-2xl font-semibold">{valor}</p>
                 </div>
-                <div className="rounded-lg bg-primary/10 p-2.5 text-primary">{icone}</div>
+                <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
+                    {icone}
+                </div>
             </CardContent>
         </Card>
     );
@@ -225,27 +304,44 @@ function NovoSetor() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="outline"><Plus className="size-4" /> Novo setor</Button>
+                <Button variant="outline">
+                    <Plus className="size-4" /> Novo setor
+                </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Novo setor</DialogTitle>
-                    <DialogDescription>Organize as mesas por ambientes do restaurante.</DialogDescription>
+                    <DialogDescription>
+                        Organize as mesas por ambientes do restaurante.
+                    </DialogDescription>
                 </DialogHeader>
                 <Form {...cadastrarSetor.form()} className="grid gap-4">
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-2">
                                 <Label htmlFor="setor-nome">Nome</Label>
-                                <Input id="setor-nome" name="nome" placeholder="Ex.: Salão principal" required />
+                                <Input
+                                    id="setor-nome"
+                                    name="nome"
+                                    placeholder="Ex.: Salão principal"
+                                    required
+                                />
                                 <InputError message={errors.nome} />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="setor-descricao">Descrição</Label>
-                                <Input id="setor-descricao" name="descricao" placeholder="Opcional" />
+                                <Label htmlFor="setor-descricao">
+                                    Descrição
+                                </Label>
+                                <Input
+                                    id="setor-descricao"
+                                    name="descricao"
+                                    placeholder="Opcional"
+                                />
                                 <InputError message={errors.descricao} />
                             </div>
-                            <Button disabled={processing}>Cadastrar setor</Button>
+                            <Button disabled={processing}>
+                                Cadastrar setor
+                            </Button>
                         </>
                     )}
                 </Form>
@@ -258,12 +354,16 @@ function NovaMesa({ setores }: { setores: Setor[] }) {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button disabled={setores.length === 0}><Plus className="size-4" /> Nova mesa</Button>
+                <Button disabled={setores.length === 0}>
+                    <Plus className="size-4" /> Nova mesa
+                </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Nova mesa</DialogTitle>
-                    <DialogDescription>Informe onde a mesa fica e quantas pessoas acomoda.</DialogDescription>
+                    <DialogDescription>
+                        Informe onde a mesa fica e quantas pessoas acomoda.
+                    </DialogDescription>
                 </DialogHeader>
                 <Form {...cadastrarMesa.form()} className="grid gap-4">
                     {({ processing, errors }) => (
@@ -271,10 +371,17 @@ function NovaMesa({ setores }: { setores: Setor[] }) {
                             <div className="grid gap-2">
                                 <Label htmlFor="mesa-setor">Setor</Label>
                                 <Select name="setor_salao_id" required>
-                                    <SelectTrigger id="mesa-setor"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                                    <SelectTrigger id="mesa-setor">
+                                        <SelectValue placeholder="Selecione" />
+                                    </SelectTrigger>
                                     <SelectContent>
                                         {setores.map((setor) => (
-                                            <SelectItem key={setor.id} value={String(setor.id)}>{setor.nome}</SelectItem>
+                                            <SelectItem
+                                                key={setor.id}
+                                                value={String(setor.id)}
+                                            >
+                                                {setor.nome}
+                                            </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
@@ -282,17 +389,36 @@ function NovaMesa({ setores }: { setores: Setor[] }) {
                             </div>
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="mesa-numero">Identificação</Label>
-                                    <Input id="mesa-numero" name="numero" placeholder="Ex.: 01" required />
+                                    <Label htmlFor="mesa-numero">
+                                        Identificação
+                                    </Label>
+                                    <Input
+                                        id="mesa-numero"
+                                        name="numero"
+                                        placeholder="Ex.: 01"
+                                        required
+                                    />
                                     <InputError message={errors.numero} />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="mesa-capacidade">Capacidade</Label>
-                                    <Input id="mesa-capacidade" name="capacidade" type="number" min="1" max="99" defaultValue="4" required />
+                                    <Label htmlFor="mesa-capacidade">
+                                        Capacidade
+                                    </Label>
+                                    <Input
+                                        id="mesa-capacidade"
+                                        name="capacidade"
+                                        type="number"
+                                        min="1"
+                                        max="99"
+                                        defaultValue="4"
+                                        required
+                                    />
                                     <InputError message={errors.capacidade} />
                                 </div>
                             </div>
-                            <Button disabled={processing}>Cadastrar mesa</Button>
+                            <Button disabled={processing}>
+                                Cadastrar mesa
+                            </Button>
                         </>
                     )}
                 </Form>
@@ -301,24 +427,60 @@ function NovaMesa({ setores }: { setores: Setor[] }) {
     );
 }
 
-function AbrirMesaDialog({ mesa, onClose }: { mesa: Mesa | null; onClose: () => void }) {
+function AbrirMesaDialog({
+    mesa,
+    onClose,
+}: {
+    mesa: Mesa | null;
+    onClose: () => void;
+}) {
     return (
-        <Dialog open={mesa !== null} onOpenChange={(aberto) => !aberto && onClose()}>
+        <Dialog
+            open={mesa !== null}
+            onOpenChange={(aberto) => !aberto && onClose()}
+        >
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Abrir mesa {mesa?.numero}</DialogTitle>
-                    <DialogDescription>Informe quantas pessoas participarão desta comanda.</DialogDescription>
+                    <DialogDescription>
+                        Informe quantas pessoas participarão desta comanda.
+                    </DialogDescription>
                 </DialogHeader>
-                <Form {...abrirComanda.form()} className="grid gap-4" onSuccess={onClose}>
+                <Form
+                    {...abrirComanda.form()}
+                    className="grid gap-4"
+                    onSuccess={onClose}
+                >
                     {({ processing, errors }) => (
                         <>
-                            <input type="hidden" name="mesa_id" value={mesa?.id ?? ''} />
+                            <input
+                                type="hidden"
+                                name="mesa_id"
+                                value={mesa?.id ?? ''}
+                            />
                             <div className="grid gap-2">
-                                <Label htmlFor="quantidade-pessoas">Quantidade de pessoas</Label>
-                                <Input id="quantidade-pessoas" name="quantidade_pessoas" type="number" min="1" max="99" defaultValue="2" required />
-                                <InputError message={errors.quantidade_pessoas ?? errors.mesa_id} />
+                                <Label htmlFor="quantidade-pessoas">
+                                    Quantidade de pessoas
+                                </Label>
+                                <Input
+                                    id="quantidade-pessoas"
+                                    name="quantidade_pessoas"
+                                    type="number"
+                                    min="1"
+                                    max="99"
+                                    defaultValue="2"
+                                    required
+                                />
+                                <InputError
+                                    message={
+                                        errors.quantidade_pessoas ??
+                                        errors.mesa_id
+                                    }
+                                />
                             </div>
-                            <Button disabled={processing}>Iniciar atendimento</Button>
+                            <Button disabled={processing}>
+                                Iniciar atendimento
+                            </Button>
                         </>
                     )}
                 </Form>

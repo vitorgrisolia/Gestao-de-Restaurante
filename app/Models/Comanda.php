@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -36,6 +37,12 @@ class Comanda extends Model
     public function abertaPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'aberta_por_id');
+    }
+
+    /** @return HasMany<Pedido, $this> */
+    public function pedidos(): HasMany
+    {
+        return $this->hasMany(Pedido::class);
     }
 
     /** @return array<string, string> */

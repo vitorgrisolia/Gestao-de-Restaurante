@@ -20,4 +20,9 @@ enum PapelUsuario: string
     {
         return in_array($this, [self::Proprietario, self::Gerente, self::Caixa, self::Atendente], true);
     }
+
+    public function podeRegistrarPedido(): bool
+    {
+        return in_array($this, [self::Proprietario, self::Gerente, self::Caixa, self::Atendente], true);
+    }
 }
