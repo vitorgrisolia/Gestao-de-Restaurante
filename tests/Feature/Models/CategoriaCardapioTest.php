@@ -21,9 +21,9 @@ class CategoriaCardapioTest extends TestCase
 
         $categoria->load('itens');
 
-        $this->assertSame(
+        $this->assertEqualsCanonicalizing(
             [$primeiroItem->id, $segundoItem->id],
-            $categoria->itens->modelKeys(),
+            $categoria->itens->modelKeys()
         );
     }
 }

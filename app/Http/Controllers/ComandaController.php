@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Actions\AbrirComanda;
+use App\FormaPagamento;
 use App\Http\Requests\AbrirComandaRequest;
 use App\Models\CategoriaCardapio;
 use App\Models\Comanda;
 use App\Models\Mesa;
+use App\Models\PedidoItem;
+use App\StatusItemPedido;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -25,6 +28,10 @@ class ComandaController extends Controller
             ->orderByDesc('id')
             ->get();
 
+        $totalComandaCentavos = $pedidos->flatMap->itens
+            ->reject(fn (PedidoItem $item): bool => $item->status === StatusItemPedido::Cancelado)
+            ->sum(fn (PedidoItem $item): int => $item->subtotalCentavos());
+
         $categorias = CategoriaCardapio::query()
             ->where('ativa', true)
             ->with(['itens' => fn ($query) => $query
@@ -39,6 +46,12 @@ class ComandaController extends Controller
             'comanda' => $comanda,
             'pedidos' => $pedidos,
             'categorias' => $categorias,
+            'totalComandaCentavos' => $totalComandaCentavos,
+            'podeFecharComanda' => $request->user()->papel->podeReceberPagamento(),
+            'formasPagamento' => array_map(
+                fn (FormaPagamento $forma): array => ['valor' => $forma->value, 'nome' => $forma->nome()],
+                FormaPagamento::cases(),
+            ),
         ]);
     }
 

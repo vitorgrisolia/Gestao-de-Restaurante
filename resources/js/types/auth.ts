@@ -4,6 +4,13 @@ export type User = {
     email: string;
     avatar?: string;
     email_verified_at: string | null;
+    papel:
+        | 'proprietario'
+        | 'gerente'
+        | 'caixa'
+        | 'atendente'
+        | 'cozinha'
+        | 'estoque';
     /* @chisel-2fa */
     two_factor_enabled?: boolean;
     /* @end-chisel-2fa */

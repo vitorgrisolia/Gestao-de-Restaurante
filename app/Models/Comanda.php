@@ -45,6 +45,12 @@ class Comanda extends Model
         return $this->hasMany(Pedido::class);
     }
 
+    /** @return HasMany<Pagamento, $this> */
+    public function pagamentos(): HasMany
+    {
+        return $this->hasMany(Pagamento::class);
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {
