@@ -1,5 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
+    ChefHat,
+    CreditCard,
     LayoutDashboard,
     ListPlus,
     UserRoundCog,
@@ -20,6 +22,9 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { index as cardapio } from '@/routes/cardapio';
+import { index as caixas } from '@/routes/caixas';
+import { index as producao } from '@/routes/producao';
+import { index as setoresProducao } from '@/routes/setores-producao';
 import { index as salao } from '@/routes/salao';
 import { index as usuarios } from '@/routes/usuarios';
 import type { Auth, NavItem } from '@/types';
@@ -43,12 +48,29 @@ export function AppSidebar() {
     const { auth } = usePage<{ auth: Auth }>().props;
     const mainNavItems = [...operationNavItems];
 
+    if (['proprietario', 'gerente', 'cozinha'].includes(auth.user.papel)) {
+        mainNavItems.push({
+            title: 'Painel de produção',
+            href: producao(),
+            icon: ChefHat,
+        });
+    }
+
+    if (['proprietario', 'gerente', 'caixa'].includes(auth.user.papel)) {
+        mainNavItems.push({ title: 'Caixa', href: caixas(), icon: CreditCard });
+    }
+
     if (auth.user.papel === 'proprietario') {
         mainNavItems.push(
             {
                 title: 'Cadastro do cardápio',
                 href: cardapio(),
                 icon: ListPlus,
+            },
+            {
+                title: 'Setores de produção',
+                href: setoresProducao(),
+                icon: ChefHat,
             },
             {
                 title: 'Cadastro de usuários',

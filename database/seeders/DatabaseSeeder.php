@@ -12,9 +12,6 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         User::query()->updateOrCreate([
@@ -30,6 +27,7 @@ class DatabaseSeeder extends Seeder
             SetorSalaoSeeder::class,
             MesaSeeder::class,
             CategoriaCardapioSeeder::class,
+            SetorProducaoSeeder::class,
             ItemCardapioSeeder::class,
         ]);
     }

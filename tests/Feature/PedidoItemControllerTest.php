@@ -96,7 +96,7 @@ class PedidoItemControllerTest extends TestCase
         $atendente = User::factory()->create(['papel' => PapelUsuario::Atendente]);
         $comanda = Comanda::factory()->create([
             'status' => StatusComanda::Fechada,
-            'ativa' => false,
+            'ativa' => null,
         ]);
         $pedido = Pedido::factory()->for($comanda)->create();
         $item = PedidoItem::factory()->for($pedido)->create(['quantidade' => 1]);

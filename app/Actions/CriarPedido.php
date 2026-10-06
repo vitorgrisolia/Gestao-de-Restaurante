@@ -59,6 +59,7 @@ class CriarPedido
 
                 $pedido->itens()->create([
                     'item_cardapio_id' => $produto->id,
+                    'setor_producao_id' => $produto->setor_producao_id,
                     'nome_item' => $produto->nome,
                     'quantidade' => $dadosItem['quantidade'],
                     'preco_unitario_centavos' => $produto->preco_centavos,

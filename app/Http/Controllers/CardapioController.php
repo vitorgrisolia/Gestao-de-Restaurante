@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CategoriaCardapio;
 use App\Models\ItemCardapio;
+use App\Models\SetorProducao;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -24,6 +25,7 @@ class CardapioController extends Controller
 
         return Inertia::render('cardapio/index', [
             'categorias' => $categorias,
+            'setoresProducao' => SetorProducao::query()->orderBy('ordem')->orderBy('nome')->get(['id', 'nome', 'ativo']),
             'resumo' => [
                 'categorias' => $categorias->count(),
                 'itens' => ItemCardapio::query()->count(),

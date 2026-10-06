@@ -47,6 +47,12 @@ class Pedido extends Model
         return $this->hasMany(PedidoItem::class);
     }
 
+    /** @return HasMany<ImpressaoProducao, $this> */
+    public function impressoesProducao(): HasMany
+    {
+        return $this->hasMany(ImpressaoProducao::class);
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {

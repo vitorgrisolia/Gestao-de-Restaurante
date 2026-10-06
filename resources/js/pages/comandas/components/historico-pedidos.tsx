@@ -17,6 +17,7 @@ import {
     destroy as removerItemPedido,
     update as atualizarItemPedido,
 } from '@/routes/pedido-itens';
+import { AcoesPedido } from './acoes-pedido';
 import type { ItemPedido, Pedido } from '../types';
 
 export function HistoricoPedidos({ pedidos }: { pedidos: Pedido[] }) {
@@ -60,6 +61,9 @@ function PedidoCard({ pedido }: { pedido: Pedido }) {
                     Registrado por {pedido.criado_por.name}
                 </CardDescription>
             </CardHeader>
+            <div className="flex justify-end">
+                <AcoesPedido pedido={pedido} />
+            </div>
             <CardContent className="grid gap-3 px-4">
                 {pedido.itens.map((item) =>
                     pedido.status === 'rascunho' &&
@@ -200,6 +204,12 @@ function ItemSomenteLeitura({ item }: { item: ItemPedido }) {
             {item.observacao && (
                 <p className="text-xs text-muted-foreground">
                     {item.observacao}
+                </p>
+            )}
+            {item.status === 'cancelado' && item.motivo_cancelamento && (
+                <p className="rounded-md bg-destructive/10 p-2 text-xs text-destructive">
+                    Cancelado por {item.cancelado_por?.name ?? 'usuário'}:{' '}
+                    {item.motivo_cancelamento}
                 </p>
             )}
         </div>

@@ -20,6 +20,7 @@ export default function ComandaShow({
     totalComandaCentavos,
     podeFecharComanda,
     formasPagamento,
+    conta,
 }: ComandaPageProps) {
     const formulario = useForm<NovoPedidoForm>({
         comanda: '',
@@ -163,6 +164,8 @@ export default function ComandaShow({
                             totalCentavos={totalComandaCentavos}
                             podeFechar={podeFecharComanda}
                             formasPagamento={formasPagamento}
+                            conta={conta}
+                            itens={pedidos.flatMap((pedido) => pedido.itens)}
                         />
                     </aside>
                 </div>

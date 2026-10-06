@@ -9,32 +9,36 @@ use Illuminate\Validation\Rule;
 
 class StorePagamentoRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge(['tipo_divisao' => $this->input('tipo_divisao', 'integral')]);
+    }
+
     public function authorize(): bool
     {
         return $this->user()?->papel->podeReceberPagamento() ?? false;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
+    /** @return array<string,ValidationRule|array<mixed>|string> */
     public function rules(): array
     {
-        return [
-            'forma_pagamento' => ['required', Rule::enum(FormaPagamento::class)],
-        ];
+        return ['forma_pagamento' => ['required', Rule::enum(FormaPagamento::class)], 'tipo_divisao' => ['required', Rule::in(['integral', 'pessoa', 'itens', 'valor'])], 'valor' => ['nullable', 'numeric', 'min:0.01', 'max:999999.99'], 'itens' => ['nullable', 'array'], 'itens.*' => ['integer', 'distinct', 'exists:pedido_itens,id']];
+    }
+
+    public function valorCentavos(): int
+    {
+        return (int) round($this->float('valor') * 100);
+    }
+
+    /** @return list<int> */
+    public function itens(): array
+    {
+        return array_values(array_map('intval', $this->validated('itens', [])));
     }
 
     /** @return array<string, string> */
     public function messages(): array
     {
-        return [
-            'forma_pagamento.required' => 'Selecione a forma de pagamento.',
-            'forma_pagamento.enum' => 'Selecione uma forma de pagamento válida.',
-        ];
+        return ['forma_pagamento.enum' => 'Selecione uma forma de pagamento válida.'];
     }
 }

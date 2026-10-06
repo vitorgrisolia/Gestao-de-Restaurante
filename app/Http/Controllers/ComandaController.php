@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\AbrirComanda;
+use App\Actions\CalcularContaComanda;
 use App\FormaPagamento;
 use App\Http\Requests\AbrirComandaRequest;
 use App\Models\CategoriaCardapio;
@@ -17,14 +18,14 @@ use Inertia\Response;
 
 class ComandaController extends Controller
 {
-    public function show(Request $request, Comanda $comanda): Response
+    public function show(Request $request, Comanda $comanda, CalcularContaComanda $calcularConta): Response
     {
         abort_unless($request->user()?->papel->podeRegistrarPedido() ?? false, 403);
 
         $comanda->load('mesa:id,numero');
 
         $pedidos = $comanda->pedidos()
-            ->with(['criadoPor:id,name', 'itens'])
+            ->with(['criadoPor:id,name', 'itens.canceladoPor:id,name'])
             ->orderByDesc('id')
             ->get();
 
@@ -47,6 +48,8 @@ class ComandaController extends Controller
             'pedidos' => $pedidos,
             'categorias' => $categorias,
             'totalComandaCentavos' => $totalComandaCentavos,
+            'conta' => $calcularConta->handle($comanda),
+            'pagamentos' => $comanda->pagamentos()->with('recebidoPor:id,name')->latest('id')->get(),
             'podeFecharComanda' => $request->user()->papel->podeReceberPagamento(),
             'formasPagamento' => array_map(
                 fn (FormaPagamento $forma): array => ['valor' => $forma->value, 'nome' => $forma->nome()],

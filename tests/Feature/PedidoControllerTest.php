@@ -93,7 +93,7 @@ class PedidoControllerTest extends TestCase
         $atendente = User::factory()->create(['papel' => PapelUsuario::Atendente]);
         $comanda = Comanda::factory()->for($atendente, 'abertaPor')->create([
             'status' => StatusComanda::Fechada,
-            'ativa' => false,
+            'ativa' => null,
         ]);
         $produto = ItemCardapio::factory()->create();
 

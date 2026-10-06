@@ -55,7 +55,7 @@ class FinalizarComanda
 
             $comandaBloqueada->update([
                 'status' => StatusComanda::Fechada,
-                'ativa' => false,
+                'ativa' => null,
                 'fechada_em' => now(),
             ]);
 

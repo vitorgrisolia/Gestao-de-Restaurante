@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\CategoriaCardapio;
+use App\Models\SetorProducao;
 use Illuminate\Database\Seeder;
 
 class ItemCardapioSeeder extends Seeder
@@ -35,11 +36,14 @@ class ItemCardapioSeeder extends Seeder
             $categoria = CategoriaCardapio::query()
                 ->where('nome', $nomeCategoria)
                 ->firstOrFail();
+            $setorProducao = SetorProducao::query()
+                ->where('nome', $nomeCategoria === 'Bebidas' ? 'Bar' : 'Cozinha')
+                ->firstOrFail();
 
             foreach ($itens as $item) {
                 $categoria->itens()->updateOrCreate(
                     ['nome' => $item['nome']],
-                    [...$item, 'imagem' => null, 'disponivel' => true],
+                    [...$item, 'setor_producao_id' => $setorProducao->id, 'imagem' => null, 'disponivel' => true],
                 );
             }
         }

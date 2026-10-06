@@ -2,7 +2,7 @@
 
 Sistema web para apoiar a operação de um restaurante, começando pelo salão, mesas, comandas, cardápio e registro de pedidos. O projeto usa Laravel, React, Inertia e TypeScript e está sendo desenvolvido incrementalmente a partir da análise de negócio.
 
-> **Estado atual:** o fluxo de salão, pedidos e pagamento integral com fechamento da comanda estão funcionais. Produção, pagamentos parciais, estoque, relatórios e integração fiscal pertencem às próximas fases.
+> **Estado atual:** os fluxos de salão, pedidos, produção e pagamento integral com fechamento da comanda estão funcionais. Pagamentos parciais, estoque, relatórios e integração fiscal pertencem às próximas fases.
 
 ## Objetivo
 
@@ -27,7 +27,7 @@ O produto completo pretende abranger salão, balcão, retirada, produção, cont
 | Gerente      | Gerencia salão, pedidos e recebe pagamentos      |
 | Caixa        | Abre comandas, registra pedidos e recebe valores |
 | Atendente    | Abre comandas e registra pedidos                 |
-| Cozinha      | Reservado para o futuro painel de produção       |
+| Cozinha      | Opera o painel e atualiza o preparo dos itens    |
 | Estoque      | Reservado para o futuro módulo de estoque        |
 
 As permissões ainda são regras simples no enum `PapelUsuario`. Capacidades granulares fazem parte do roadmap.
@@ -54,6 +54,8 @@ As permissões ainda são regras simples no enum `PapelUsuario`. Capacidades gra
 
 O proprietário possui uma tela administrativa para cadastrar categorias e itens, definir preço, descrição, imagem, ordem, situação e disponibilidade. Os dados demonstrativos continuam disponíveis pelos seeders.
 
+- edição e exclusão protegida de categorias e itens pelo proprietário;
+
 ### Administração de usuários
 
 - tela exclusiva do proprietário;
@@ -71,6 +73,10 @@ O proprietário possui uma tela administrativa para cadastrar categorias e itens
 - seleção de quantidade e observação por item;
 - observação geral do pedido;
 - cálculo visual de subtotais e total;
+- envio transacional do pedido e dos itens para produção;
+- bloqueio de reenvio e de alterações após o envio;
+- cancelamento com motivo obrigatório, responsável e horário;
+- exclusão dos itens cancelados do total da comanda;
 - gravação inicial como rascunho;
 - histórico dos pedidos da comanda;
 - registro do usuário responsável;
@@ -87,7 +93,7 @@ rascunho → enviado → em_preparo → pronto → entregue
                                       ↘ cancelado
 ```
 
-Somente a criação em `rascunho` está ligada à interface. Produção, entrega e cancelamento são próximos passos.
+O envio, o cancelamento e o acompanhamento da produção estão ligados à interface, com responsáveis, horários e controle de reimpressão.
 
 ### Pagamento e fechamento
 
@@ -369,23 +375,23 @@ Antes da produção ainda são necessários HTTPS, gestão de segredos, backups 
 - [x] administração visual para cadastrar categorias e itens;
 - [x] cadastro de usuários e papéis pelo proprietário;
 - [x] alterar e remover itens em rascunho;
-- [ ] enviar à produção e cancelar com auditoria.
+- [x] enviar à produção e cancelar com auditoria.
 
 ### Produção
 
-- [ ] setores de cozinha e bar;
-- [ ] painel recebido/em preparo/pronto/entregue;
-- [ ] responsáveis, horários e pedidos atrasados;
-- [ ] reenvio e impressão sem duplicidade.
+- [x] setores de cozinha e bar, com CRUD exclusivo do proprietário;
+- [x] painel recebido/em preparo/pronto/entregue;
+- [x] responsáveis, horários e pedidos atrasados;
+- [x] reenvio e impressão sem duplicidade.
 
 ### Conta, pagamentos e caixa
 
-- [ ] subtotal, serviço, couvert, desconto e acréscimo;
-- [ ] divisão por pessoa, item ou valor;
-- [ ] múltiplos pagamentos, saldo e troco;
+- [x] subtotal, serviço, couvert, desconto e acréscimo;
+- [x] divisão por pessoa, item ou valor;
+- [x] múltiplos pagamentos, saldo e troco;
 - [x] pagamento integral com valor calculado no servidor;
 - [x] quitação e liberação automática da mesa;
-- [ ] abertura, fechamento e estorno de caixa.
+- [x] abertura, fechamento e estorno de caixa.
 
 ### Estoque e gestão
 
@@ -405,8 +411,7 @@ Antes da produção ainda são necessários HTTPS, gestão de segredos, backups 
 
 - uma empresa e uma unidade;
 - sem operação offline completa;
-- sem edição ou exclusão de categorias, itens e usuários pela interface;
-- sem painel de produção;
+- sem edição ou exclusão de usuários pela interface;
 - sem pagamento parcial, divisão da conta, troco, desconto ou taxa de serviço;
 - sem estoque, relatórios ou emissão fiscal;
 - ainda não pronto para produção comercial.

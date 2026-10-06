@@ -21,7 +21,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $aberta_em
  * @property Carbon|null $fechada_em
  */
-#[Fillable(['mesa_id', 'aberta_por_id', 'quantidade_pessoas', 'status', 'ativa', 'aberta_em', 'fechada_em'])]
+#[Fillable(['mesa_id', 'aberta_por_id', 'quantidade_pessoas', 'status', 'ativa', 'aberta_em', 'fechada_em', 'servico_percentual', 'couvert_por_pessoa_centavos', 'desconto_centavos', 'acrescimo_centavos'])]
 class Comanda extends Model
 {
     /** @use HasFactory<ComandaFactory> */

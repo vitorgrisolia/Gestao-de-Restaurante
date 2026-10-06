@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\EstadoMesa;
 use App\FormaPagamento;
+use App\Models\Caixa;
 use App\Models\Comanda;
 use App\Models\Mesa;
 use App\Models\Pedido;
@@ -22,6 +23,7 @@ class PagamentoControllerTest extends TestCase
     public function test_caixa_recebe_pagamento_fecha_comanda_e_libera_mesa(): void
     {
         $caixa = User::factory()->create(['papel' => PapelUsuario::Caixa]);
+        Caixa::factory()->create(['aberto_por_id' => $caixa->id, 'aberto' => true]);
         $mesa = Mesa::factory()->create(['estado' => EstadoMesa::Ocupada]);
         $comanda = Comanda::factory()
             ->for($mesa)
@@ -58,7 +60,7 @@ class PagamentoControllerTest extends TestCase
         $this->assertDatabaseHas('comandas', [
             'id' => $comanda->id,
             'status' => StatusComanda::Fechada->value,
-            'ativa' => false,
+            'ativa' => null,
         ]);
         $this->assertDatabaseHas('mesas', [
             'id' => $mesa->id,
@@ -98,7 +100,7 @@ class PagamentoControllerTest extends TestCase
         $proprietario = User::factory()->create(['papel' => PapelUsuario::Proprietario]);
         $comanda = Comanda::factory()->create([
             'status' => StatusComanda::Fechada,
-            'ativa' => false,
+            'ativa' => null,
             'fechada_em' => now(),
         ]);
 

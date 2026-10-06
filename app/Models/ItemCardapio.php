@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property int $id
  * @property int $categoria_cardapio_id
+ * @property int|null $setor_producao_id
  * @property string $nome
  * @property string|null $descricao
  * @property int $preco_centavos
@@ -19,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool $disponivel
  * @property int $ordem
  */
-#[Fillable(['categoria_cardapio_id', 'nome', 'descricao', 'preco_centavos', 'imagem', 'disponivel', 'ordem'])]
+#[Fillable(['categoria_cardapio_id', 'setor_producao_id', 'nome', 'descricao', 'preco_centavos', 'imagem', 'disponivel', 'ordem'])]
 class ItemCardapio extends Model
 {
     /** @use HasFactory<ItemCardapioFactory> */
@@ -31,6 +32,12 @@ class ItemCardapio extends Model
     public function categoria(): BelongsTo
     {
         return $this->belongsTo(CategoriaCardapio::class, 'categoria_cardapio_id');
+    }
+
+    /** @return BelongsTo<SetorProducao, $this> */
+    public function setorProducao(): BelongsTo
+    {
+        return $this->belongsTo(SetorProducao::class, 'setor_producao_id');
     }
 
     /** @return HasMany<PedidoItem, $this> */

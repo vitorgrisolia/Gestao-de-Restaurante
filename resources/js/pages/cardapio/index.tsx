@@ -22,9 +22,11 @@ import {
 import { store as cadastrarCategoria } from '@/routes/categorias-cardapio';
 import { index as cardapio } from '@/routes/cardapio';
 import { store as cadastrarItem } from '@/routes/itens-cardapio';
+import { AcoesCategoria, AcoesItem } from './components/crud-actions';
 
-type ItemCardapio = {
+export type ItemCardapio = {
     id: number;
+    setor_producao_id: number | null;
     nome: string;
     descricao: string | null;
     preco_centavos: number;
@@ -33,7 +35,9 @@ type ItemCardapio = {
     ordem: number;
 };
 
-type Categoria = {
+export type SetorProducao = { id: number; nome: string; ativo: boolean };
+
+export type Categoria = {
     id: number;
     nome: string;
     descricao: string | null;
@@ -44,6 +48,7 @@ type Categoria = {
 
 type Props = {
     categorias: Categoria[];
+    setoresProducao: SetorProducao[];
     resumo: {
         categorias: number;
         itens: number;
@@ -56,7 +61,11 @@ const moeda = new Intl.NumberFormat('pt-BR', {
     currency: 'BRL',
 });
 
-export default function CardapioIndex({ categorias, resumo }: Props) {
+export default function CardapioIndex({
+    categorias,
+    setoresProducao,
+    resumo,
+}: Props) {
     return (
         <>
             <Head title="Cadastro do cardápio" />
@@ -140,6 +149,47 @@ export default function CardapioIndex({ categorias, resumo }: Props) {
                                                 <InputError
                                                     message={
                                                         errors.categoria_cardapio_id
+                                                    }
+                                                />
+                                            </div>
+
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="item-setor">
+                                                    Setor de produção
+                                                </Label>
+                                                <Select
+                                                    name="setor_producao_id"
+                                                    required
+                                                >
+                                                    <SelectTrigger
+                                                        id="item-setor"
+                                                        className="w-full"
+                                                    >
+                                                        <SelectValue placeholder="Selecione" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {setoresProducao.map(
+                                                            (setor) => (
+                                                                <SelectItem
+                                                                    key={
+                                                                        setor.id
+                                                                    }
+                                                                    value={String(
+                                                                        setor.id,
+                                                                    )}
+                                                                >
+                                                                    {setor.nome}
+                                                                    {setor.ativo
+                                                                        ? ''
+                                                                        : ' (inativo)'}
+                                                                </SelectItem>
+                                                            ),
+                                                        )}
+                                                    </SelectContent>
+                                                </Select>
+                                                <InputError
+                                                    message={
+                                                        errors.setor_producao_id
                                                     }
                                                 />
                                             </div>
@@ -352,6 +402,7 @@ export default function CardapioIndex({ categorias, resumo }: Props) {
                             {categorias.map((categoria) => (
                                 <Card key={categoria.id} className="gap-4 py-4">
                                     <CardHeader className="px-4">
+                                        <AcoesCategoria categoria={categoria} />
                                         <div className="flex items-start justify-between gap-3">
                                             <div>
                                                 <CardTitle>
@@ -407,6 +458,16 @@ export default function CardapioIndex({ categorias, resumo }: Props) {
                                                                 100,
                                                         )}
                                                     </strong>
+                                                    <AcoesItem
+                                                        item={item}
+                                                        categoriaId={
+                                                            categoria.id
+                                                        }
+                                                        categorias={categorias}
+                                                        setoresProducao={
+                                                            setoresProducao
+                                                        }
+                                                    />
                                                 </div>
                                             ))
                                         )}

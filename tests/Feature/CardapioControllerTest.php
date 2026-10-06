@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\CategoriaCardapio;
 use App\Models\ItemCardapio;
+use App\Models\SetorProducao;
 use App\Models\User;
 use App\PapelUsuario;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -68,11 +69,13 @@ class CardapioControllerTest extends TestCase
     {
         $proprietario = User::factory()->create(['papel' => PapelUsuario::Proprietario]);
         $categoria = CategoriaCardapio::factory()->create();
+        $setor = SetorProducao::factory()->create();
 
         $this->actingAs($proprietario)
             ->from(route('cardapio.index'))
             ->post(route('itens-cardapio.store'), [
                 'categoria_cardapio_id' => $categoria->id,
+                'setor_producao_id' => $setor->id,
                 'nome' => 'Lasanha bolonhesa',
                 'descricao' => 'Massa, molho e queijo',
                 'preco' => '42.90',
@@ -85,6 +88,7 @@ class CardapioControllerTest extends TestCase
 
         $this->assertDatabaseHas('itens_cardapio', [
             'categoria_cardapio_id' => $categoria->id,
+            'setor_producao_id' => $setor->id,
             'nome' => 'Lasanha bolonhesa',
             'preco_centavos' => 4_290,
             'disponivel' => true,
@@ -96,11 +100,13 @@ class CardapioControllerTest extends TestCase
     {
         $proprietario = User::factory()->create(['papel' => PapelUsuario::Proprietario]);
         $categoria = CategoriaCardapio::factory()->create();
+        $setor = SetorProducao::factory()->create();
         ItemCardapio::factory()->for($categoria, 'categoria')->create(['nome' => 'Lasanha']);
 
         $this->actingAs($proprietario)
             ->post(route('itens-cardapio.store'), [
                 'categoria_cardapio_id' => $categoria->id,
+                'setor_producao_id' => $setor->id,
                 'nome' => 'Lasanha',
                 'preco' => '30.00',
                 'disponivel' => true,

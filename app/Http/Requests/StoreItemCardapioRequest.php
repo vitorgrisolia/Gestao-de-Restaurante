@@ -26,6 +26,7 @@ class StoreItemCardapioRequest extends FormRequest
     {
         return [
             'categoria_cardapio_id' => ['required', 'integer', 'exists:categorias_cardapio,id'],
+            'setor_producao_id' => ['required', 'integer', 'exists:setores_producao,id'],
             'nome' => [
                 'required',
                 'string',
@@ -46,6 +47,8 @@ class StoreItemCardapioRequest extends FormRequest
         return [
             'categoria_cardapio_id.required' => 'Selecione a categoria.',
             'categoria_cardapio_id.exists' => 'Selecione uma categoria válida.',
+            'setor_producao_id.required' => 'Selecione o setor responsável pelo preparo.',
+            'setor_producao_id.exists' => 'Selecione um setor de produção válido.',
             'nome.required' => 'Informe o nome do item.',
             'nome.unique' => 'Já existe um item com este nome na categoria.',
             'preco.required' => 'Informe o preço do item.',
