@@ -5,11 +5,18 @@ use App\Http\Controllers\CardapioController;
 use App\Http\Controllers\CategoriaCardapioController;
 use App\Http\Controllers\ComandaController;
 use App\Http\Controllers\ContaComandaController;
+use App\Http\Controllers\CupomTermicoController;
+use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\EstornoPagamentoController;
+use App\Http\Controllers\FichaTecnicaController;
 use App\Http\Controllers\ImpressaoProducaoController;
+use App\Http\Controllers\IngredienteController;
+use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\ItemCardapioController;
 use App\Http\Controllers\MapaSalaoController;
 use App\Http\Controllers\MesaController;
+use App\Http\Controllers\MonitoramentoController;
+use App\Http\Controllers\MovimentacaoEstoqueController;
 use App\Http\Controllers\PagamentoController;
 use App\Http\Controllers\PainelProducaoController;
 use App\Http\Controllers\PedidoCancelamentoController;
@@ -17,8 +24,10 @@ use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\PedidoEnvioController;
 use App\Http\Controllers\PedidoItemController;
 use App\Http\Controllers\PedidoItemStatusController;
+use App\Http\Controllers\RelatorioEstoqueController;
 use App\Http\Controllers\SetorProducaoController;
 use App\Http\Controllers\SetorSalaoController;
+use App\Http\Controllers\UnidadeMedidaController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +48,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('producao', PainelProducaoController::class)->name('producao.index');
     Route::patch('pedido-itens/{pedido_item}/status', [PedidoItemStatusController::class, 'update'])->name('pedido-itens.status.update');
     Route::post('pedidos/{pedido}/setores-producao/{setor_producao}/impressoes', [ImpressaoProducaoController::class, 'store'])->name('producao.impressoes.store');
+    Route::get('impressoes-termicas/{impressao}', [CupomTermicoController::class, 'show'])->name('impressoes-termicas.show');
+    Route::patch('impressoes-termicas/{impressao}', [CupomTermicoController::class, 'update'])->name('impressoes-termicas.update');
+    Route::get('monitoramento', MonitoramentoController::class)->name('monitoramento.show');
     Route::resource('pedido-itens', PedidoItemController::class)
         ->parameters(['pedido-itens' => 'pedido_item'])
         ->only(['update', 'destroy']);
@@ -46,6 +58,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('comandas/{comanda}/conta', [ContaComandaController::class, 'update'])->name('comandas.conta.update');
     Route::post('pagamentos/{pagamento}/estornos', [EstornoPagamentoController::class, 'store'])->name('pagamentos.estornos.store');
     Route::resource('caixas', CaixaController::class)->only(['index', 'store', 'update']);
+    Route::get('estoque', EstoqueController::class)->name('estoque.index');
+    Route::resource('unidades-medida', UnidadeMedidaController::class)->only(['store', 'update', 'destroy']);
+    Route::resource('ingredientes', IngredienteController::class)->only(['store', 'update', 'destroy']);
+    Route::put('itens-cardapio/{item_cardapio}/ficha-tecnica', [FichaTecnicaController::class, 'update'])->name('fichas-tecnicas.update');
+    Route::post('ingredientes/{ingrediente}/movimentacoes', [MovimentacaoEstoqueController::class, 'store'])->name('movimentacoes-estoque.store');
+    Route::post('inventarios', [InventarioController::class, 'store'])->name('inventarios.store');
+    Route::patch('inventarios/{inventario}', [InventarioController::class, 'update'])->name('inventarios.update');
+    Route::get('estoque/relatorio.csv', RelatorioEstoqueController::class)->name('estoque.relatorio');
     Route::get('cardapio', CardapioController::class)->name('cardapio.index');
     Route::resource('categorias-cardapio', CategoriaCardapioController::class)
         ->parameters(['categorias-cardapio' => 'categoria_cardapio'])

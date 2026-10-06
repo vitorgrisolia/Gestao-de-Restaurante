@@ -4,6 +4,7 @@ import {
     CreditCard,
     LayoutDashboard,
     ListPlus,
+    PackageSearch,
     UserRoundCog,
     Utensils,
 } from 'lucide-react';
@@ -23,6 +24,7 @@ import {
 import { dashboard } from '@/routes';
 import { index as cardapio } from '@/routes/cardapio';
 import { index as caixas } from '@/routes/caixas';
+import { index as estoque } from '@/routes/estoque';
 import { index as producao } from '@/routes/producao';
 import { index as setoresProducao } from '@/routes/setores-producao';
 import { index as salao } from '@/routes/salao';
@@ -58,6 +60,14 @@ export function AppSidebar() {
 
     if (['proprietario', 'gerente', 'caixa'].includes(auth.user.papel)) {
         mainNavItems.push({ title: 'Caixa', href: caixas(), icon: CreditCard });
+    }
+
+    if (['proprietario', 'gerente', 'estoque'].includes(auth.user.papel)) {
+        mainNavItems.push({
+            title: 'Estoque e gestão',
+            href: estoque(),
+            icon: PackageSearch,
+        });
     }
 
     if (auth.user.papel === 'proprietario') {

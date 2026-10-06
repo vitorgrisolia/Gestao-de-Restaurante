@@ -46,6 +46,12 @@ class ItemCardapio extends Model
         return $this->hasMany(PedidoItem::class);
     }
 
+    /** @return HasMany<FichaTecnicaItem, $this> */
+    public function fichaTecnica(): HasMany
+    {
+        return $this->hasMany(FichaTecnicaItem::class);
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {

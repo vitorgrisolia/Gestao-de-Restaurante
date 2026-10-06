@@ -14,6 +14,8 @@ use Illuminate\Validation\ValidationException;
 
 class EnviarPedido
 {
+    public function __construct(private readonly BaixarEstoqueDoPedido $baixarEstoqueDoPedido) {}
+
     public function handle(Pedido $pedido): Pedido
     {
         return DB::transaction(function () use ($pedido): Pedido {
@@ -31,6 +33,8 @@ class EnviarPedido
                     'pedido' => 'Somente pedidos em rascunho podem ser enviados.',
                 ]);
             }
+
+            $this->baixarEstoqueDoPedido->handle($pedidoBloqueado);
 
             $enviadoEm = now();
             $pedidoBloqueado->update([

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7fc221c598a449417c1b438056fb098b",
+    "content-hash": "8fd8a41beb35dfb24b18c2064660580e",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2619,16 +2619,16 @@
         },
         {
             "name": "nesbot/carbon",
-            "version": "3.14.1",
+            "version": "3.14.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/CarbonPHP/carbon.git",
-                "reference": "34e9109535165bf1d7ff17a610492372ae73a896"
+                "reference": "94cfc34887f07ab5c0efa07914c8f527544e3224"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/34e9109535165bf1d7ff17a610492372ae73a896",
-                "reference": "34e9109535165bf1d7ff17a610492372ae73a896",
+                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/94cfc34887f07ab5c0efa07914c8f527544e3224",
+                "reference": "94cfc34887f07ab5c0efa07914c8f527544e3224",
                 "shasum": ""
             },
             "require": {
@@ -2648,7 +2648,7 @@
                 "doctrine/orm": "^2.15.2 || ^3.0",
                 "friendsofphp/php-cs-fixer": "^v3.87.1",
                 "kylekatarnls/multi-tester": "^2.5.3",
-                "phpmd/phpmd": "^2.15.0",
+                "phpmd/phpmd": "^3.0@dev",
                 "phpstan/extension-installer": "^1.4.3",
                 "phpstan/phpstan": "^2.1.22",
                 "phpunit/phpunit": "^10.5.53",
@@ -2720,7 +2720,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-09-27T12:07:26+00:00"
+            "time": "2026-10-02T07:26:52+00:00"
         },
         {
             "name": "nette/schema",
@@ -7651,16 +7651,16 @@
         },
         {
             "name": "webmozart/assert",
-            "version": "2.4.1",
+            "version": "2.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webmozarts/assert.git",
-                "reference": "2ccb7c2e821038c03a3e6e1700c570c158c55f70"
+                "reference": "8a163706bbcac613733dba03f51e13b5eb1bb819"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webmozarts/assert/zipball/2ccb7c2e821038c03a3e6e1700c570c158c55f70",
-                "reference": "2ccb7c2e821038c03a3e6e1700c570c158c55f70",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/8a163706bbcac613733dba03f51e13b5eb1bb819",
+                "reference": "8a163706bbcac613733dba03f51e13b5eb1bb819",
                 "shasum": ""
             },
             "require": {
@@ -7711,9 +7711,9 @@
             ],
             "support": {
                 "issues": "https://github.com/webmozarts/assert/issues",
-                "source": "https://github.com/webmozarts/assert/tree/2.4.1"
+                "source": "https://github.com/webmozarts/assert/tree/2.5.0"
             },
-            "time": "2026-06-15T15:31:57+00:00"
+            "time": "2026-10-05T23:14:19+00:00"
         }
     ],
     "packages-dev": [
@@ -8240,6 +8240,80 @@
                 "source": "https://github.com/laravel/boost"
             },
             "time": "2026-10-01T02:02:28+00:00"
+        },
+        {
+            "name": "laravel/cloud-cli",
+            "version": "v0.6.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/cloud-cli.git",
+                "reference": "74b68a0b315038e160a34df7ced073f15fb06b40"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/cloud-cli/zipball/74b68a0b315038e160a34df7ced073f15fb06b40",
+                "reference": "74b68a0b315038e160a34df7ced073f15fb06b40",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.3"
+            },
+            "require-dev": {
+                "illuminate/http": "^13.0",
+                "illuminate/translation": "^13.0",
+                "illuminate/validation": "^13.0",
+                "laravel-zero/framework": "^13.0",
+                "laravel-zero/phar-updater": "^1.4",
+                "laravel/agent-detector": "^2.0",
+                "laravel/pint": "^1.25.1",
+                "mockery/mockery": "^1.6.12",
+                "pestphp/pest": "^3.8.4|^4.1.2",
+                "php-parallel-lint/php-console-highlighter": "^1.0",
+                "phpstan/phpstan": "^2.1",
+                "saloonphp/cache-plugin": "^3.1",
+                "saloonphp/pagination-plugin": "^2.3",
+                "saloonphp/saloon": "^4.0",
+                "spatie/laravel-data": "^4.19"
+            },
+            "suggest": {
+                "ext-sodium": "Required to create and update secrets"
+            },
+            "bin": [
+                "builds/cloud"
+            ],
+            "type": "project",
+            "autoload": {
+                "files": [
+                    "app/helpers.php"
+                ],
+                "psr-4": {
+                    "App\\": "app/",
+                    "Database\\Seeders\\": "database/seeders/",
+                    "Database\\Factories\\": "database/factories/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                }
+            ],
+            "description": "CLI to interact with Laravel Cloud",
+            "homepage": "https://cloud.laravel.com",
+            "keywords": [
+                "cli",
+                "cloud",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/laravel/cloud-cli/issues",
+                "source": "https://github.com/laravel/cloud-cli"
+            },
+            "time": "2026-09-30T18:41:50+00:00"
         },
         {
             "name": "laravel/mcp",

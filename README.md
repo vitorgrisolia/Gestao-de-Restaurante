@@ -395,15 +395,15 @@ Antes da produção ainda são necessários HTTPS, gestão de segredos, backups 
 
 ### Estoque e gestão
 
-- [ ] ficha técnica, ingredientes e unidades;
-- [ ] entradas, perdas, ajustes e inventário;
-- [ ] baixa automática e custos;
-- [ ] relatórios, exportações e auditoria.
+- [x] ficha técnica, ingredientes e unidades;
+- [x] entradas, perdas, ajustes e inventário;
+- [x] baixa automática e custos;
+- [x] relatórios, exportações e auditoria.
 
 ### Infraestrutura e integrações
 
-- [ ] impressão térmica homologada;
-- [ ] backup, restauração e monitoramento;
+- [ ] impressão térmica homologada _(layout térmico de 80 mm, confirmação e idempotência implementados; falta homologar no equipamento físico)_;
+- [x] backup, restauração e monitoramento;
 - [ ] integração fiscal após validação contábil e homologação;
 - [ ] delivery, marketplaces, reservas e multiunidade em fases futuras.
 

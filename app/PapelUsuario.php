@@ -36,6 +36,11 @@ enum PapelUsuario: string
         return $this === self::Proprietario;
     }
 
+    public function podeOperarEstoque(): bool
+    {
+        return in_array($this, [self::Proprietario, self::Gerente, self::Estoque], true);
+    }
+
     public function podeOperarProducao(): bool
     {
         return in_array($this, [self::Proprietario, self::Gerente, self::Cozinha], true);
