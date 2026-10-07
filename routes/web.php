@@ -29,12 +29,13 @@ use App\Http\Controllers\SetorProducaoController;
 use App\Http\Controllers\SetorSalaoController;
 use App\Http\Controllers\UnidadeMedidaController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\VisaoGeralController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+Route::redirect('/', '/dashboard')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', VisaoGeralController::class)->name('dashboard');
     Route::get('salao', MapaSalaoController::class)->name('salao.index');
     Route::resource('setores-salao', SetorSalaoController::class)
         ->parameters(['setores-salao' => 'setor_salao'])
@@ -59,12 +60,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('pagamentos/{pagamento}/estornos', [EstornoPagamentoController::class, 'store'])->name('pagamentos.estornos.store');
     Route::resource('caixas', CaixaController::class)->only(['index', 'store', 'update']);
     Route::get('estoque', EstoqueController::class)->name('estoque.index');
-    Route::resource('unidades-medida', UnidadeMedidaController::class)->only(['store', 'update', 'destroy']);
+    Route::resource('unidades-medida', UnidadeMedidaController::class)->parameters(['unidades-medida' => 'unidade_medida'])->only(['store', 'update', 'destroy']);
     Route::resource('ingredientes', IngredienteController::class)->only(['store', 'update', 'destroy']);
     Route::put('itens-cardapio/{item_cardapio}/ficha-tecnica', [FichaTecnicaController::class, 'update'])->name('fichas-tecnicas.update');
     Route::post('ingredientes/{ingrediente}/movimentacoes', [MovimentacaoEstoqueController::class, 'store'])->name('movimentacoes-estoque.store');
     Route::post('inventarios', [InventarioController::class, 'store'])->name('inventarios.store');
     Route::patch('inventarios/{inventario}', [InventarioController::class, 'update'])->name('inventarios.update');
+    Route::post('inventarios/{inventario}/recontagem', [InventarioController::class, 'reiniciar'])->name('inventarios.recontagem');
     Route::get('estoque/relatorio.csv', RelatorioEstoqueController::class)->name('estoque.relatorio');
     Route::get('cardapio', CardapioController::class)->name('cardapio.index');
     Route::resource('categorias-cardapio', CategoriaCardapioController::class)

@@ -33,7 +33,9 @@ class MonitoramentoController extends Controller
             'ultimo_backup' => $dataUltimoBackup !== false ? date(DATE_ATOM, $dataUltimoBackup) : null,
             'ambiente' => app()->environment(),
         ];
-        $saudavel = $dados['banco'] === 'ok' && $dados['armazenamento'] === 'ok' && $dados['fila_falhas'] === 0;
+        $backupRecente = ! $usaSqlite || ($dataUltimoBackup !== false && $dataUltimoBackup >= now()->subDay()->timestamp);
+        $dados['backup_recente'] = $usaSqlite ? $backupRecente : null;
+        $saudavel = $dados['banco'] === 'ok' && $dados['armazenamento'] === 'ok' && $dados['fila_falhas'] === 0 && $backupRecente;
 
         return response()->json(['status' => $saudavel ? 'ok' : 'atencao', 'componentes' => $dados], $saudavel ? 200 : 503);
     }

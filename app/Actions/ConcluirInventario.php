@@ -29,7 +29,10 @@ class ConcluirInventario
                     throw ValidationException::withMessages(['contagens' => 'Informe a contagem de todos os ingredientes.']);
                 }
 
-                $ingrediente = Ingrediente::query()->findOrFail($item->ingrediente_id);
+                $ingrediente = Ingrediente::query()->lockForUpdate()->findOrFail($item->ingrediente_id);
+                if (round((float) $ingrediente->estoque_atual, 3) !== round((float) $item->quantidade_sistema, 3)) {
+                    throw ValidationException::withMessages(['inventario' => 'O estoque mudou durante a contagem. Atualize a contagem antes de concluir o inventário.']);
+                }
                 $diferenca = round($contada - (float) $ingrediente->estoque_atual, 3);
 
                 if ($diferenca !== 0.0) {

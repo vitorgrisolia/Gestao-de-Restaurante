@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Inventario;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ConcluirInventarioRequest extends FormRequest
 {
@@ -14,6 +16,12 @@ class ConcluirInventarioRequest extends FormRequest
     /** @return array<string, array<int, mixed>> */
     public function rules(): array
     {
-        return ['itens' => ['required', 'array', 'min:1'], 'itens.*.id' => ['required', 'distinct', 'exists:inventario_itens,id'], 'itens.*.quantidade_contada' => ['required', 'numeric', 'min:0', 'max:999999']];
+        $inventario = $this->route('inventario');
+
+        return [
+            'itens' => ['required', 'array', 'min:1'],
+            'itens.*.id' => ['required', 'distinct', Rule::exists('inventario_itens', 'id')->where('inventario_id', $inventario instanceof Inventario ? $inventario->id : null)],
+            'itens.*.quantidade_contada' => ['required', 'numeric', 'min:0', 'max:999999'],
+        ];
     }
 }

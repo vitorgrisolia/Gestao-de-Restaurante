@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { ClipboardCheck, Download, PackagePlus, Scale } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -101,6 +101,7 @@ export default function EstoqueIndex({
     return (
         <>
             <Head title="Estoque e gestão" />
+            <ErrosEstoque />
             <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
                 <header className="flex flex-wrap items-end justify-between gap-3">
                     <div>
@@ -456,6 +457,11 @@ export default function EstoqueIndex({
                                     </div>
                                 ))}
                                 <Button>Concluir e ajustar saldos</Button>
+                                <Button type="button" variant="outline" onClick={() => {
+                                    if (window.confirm('Atualizar os saldos de referência? Será necessário refazer a contagem física.')) {
+                                        router.post(`/inventarios/${inventarioAberto.id}/recontagem`, {}, { preserveState: false });
+                                    }
+                                }}>Reiniciar contagem com saldos atuais</Button>
                             </form>
                         )}
                     </CardContent>
@@ -517,6 +523,14 @@ export default function EstoqueIndex({
             </div>
         </>
     );
+}
+
+function ErrosEstoque() {
+    const { errors } = usePage().props;
+    if (Object.keys(errors).length === 0) { return null; }
+    return <div role="alert" className="m-4 rounded-md border border-destructive p-4 text-sm text-destructive">
+        {Object.entries(errors).map(([campo, mensagem]) => <p key={campo}>{mensagem}</p>)}
+    </div>;
 }
 function Resumo({ titulo, valor }: { titulo: string; valor: string | number }) {
     return (

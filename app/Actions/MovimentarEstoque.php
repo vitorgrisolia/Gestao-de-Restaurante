@@ -13,6 +13,7 @@ class MovimentarEstoque
     public function handle(Ingrediente $ingrediente, User $usuario, string $tipo, float $quantidade, ?string $motivo = null, ?int $custoUnitarioCentavos = null, ?int $pedidoItemId = null, ?string $chaveIdempotencia = null): MovimentacaoEstoque
     {
         return DB::transaction(function () use ($ingrediente, $usuario, $tipo, $quantidade, $motivo, $custoUnitarioCentavos, $pedidoItemId, $chaveIdempotencia): MovimentacaoEstoque {
+            $ingredienteBloqueado = Ingrediente::query()->lockForUpdate()->findOrFail($ingrediente->id);
             if ($chaveIdempotencia !== null) {
                 $existente = MovimentacaoEstoque::query()->where('chave_idempotencia', $chaveIdempotencia)->first();
 
@@ -21,7 +22,6 @@ class MovimentarEstoque
                 }
             }
 
-            $ingredienteBloqueado = Ingrediente::query()->lockForUpdate()->findOrFail($ingrediente->id);
             $saldoAnterior = (float) $ingredienteBloqueado->estoque_atual;
             $saldoPosterior = round($saldoAnterior + $quantidade, 3);
 

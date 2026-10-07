@@ -8,11 +8,29 @@ use App\Http\Requests\StoreInventarioRequest;
 use App\Models\Ingrediente;
 use App\Models\Inventario;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class InventarioController extends Controller
 {
+    public function reiniciar(Request $request, Inventario $inventario): RedirectResponse
+    {
+        abort_unless($request->user()?->papel->podeOperarEstoque() ?? false, 403);
+        DB::transaction(function () use ($inventario): void {
+            $contagem = Inventario::query()->lockForUpdate()->findOrFail($inventario->id);
+            if ($contagem->status !== 'aberto') {
+                throw ValidationException::withMessages(['inventario' => 'Somente inventários abertos podem ser recontados.']);
+            }
+            foreach ($contagem->itens()->orderBy('ingrediente_id')->get() as $item) {
+                $ingrediente = Ingrediente::query()->lockForUpdate()->findOrFail($item->ingrediente_id);
+                $item->update(['quantidade_sistema' => $ingrediente->estoque_atual, 'quantidade_contada' => null, 'diferenca' => null]);
+            }
+        });
+
+        return back()->with('success', 'Saldos atualizados. Faça uma nova contagem física antes de concluir.');
+    }
+
     public function store(StoreInventarioRequest $request): RedirectResponse
     {
         DB::transaction(function () use ($request): void {

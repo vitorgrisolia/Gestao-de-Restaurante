@@ -33,13 +33,18 @@ class RestaurarBackup extends Command
         if ($checksumAtual === false || ! hash_equals((string) $dados['sha256'], $checksumAtual)) {
             throw new RuntimeException('Checksum inválido. O backup pode estar corrompido.');
         }$destino = (string) config('database.connections.sqlite.database');
-        Artisan::call('down');
+        $estavaEmManutencao = app()->isDownForMaintenance();
+        if (! $estavaEmManutencao) {
+            Artisan::call('down');
+        }
         try {
             if (! copy($backup, $destino)) {
                 throw new RuntimeException('Não foi possível restaurar o banco.');
             }
         } finally {
-            Artisan::call('up');
+            if (! $estavaEmManutencao) {
+                Artisan::call('up');
+            }
         }$this->info('Backup restaurado e aplicação reativada.');
 
         return self::SUCCESS;
