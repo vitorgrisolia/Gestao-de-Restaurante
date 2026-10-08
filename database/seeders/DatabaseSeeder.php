@@ -14,6 +14,10 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        if (app()->isProduction()) {
+            throw new \RuntimeException('Os dados de demonstração não podem ser carregados em produção.');
+        }
+
         User::query()->updateOrCreate([
             'email' => 'proprietario@restaurante.test',
         ], [
