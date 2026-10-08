@@ -35,6 +35,7 @@ class CancelarPedido
             }
 
             $canceladoEm = now();
+            $pedidoBloqueado->itens()->orderBy('id')->lockForUpdate()->get();
             $itensNaoPreparados = $pedidoBloqueado->itens()
                 ->where('status', StatusItemPedido::Enviado)
                 ->whereNull('iniciado_em')
@@ -59,6 +60,12 @@ class CancelarPedido
                     "cancelamento:baixa:{$baixa->id}",
                 );
             }
+
+            MovimentacaoEstoque::query()
+                ->whereIn('pedido_item_id', $pedidoBloqueado->itens()->select('id'))
+                ->whereNotIn('pedido_item_id', $itensNaoPreparados)
+                ->where('tipo', 'baixa')
+                ->update(['tipo' => 'perda', 'motivo' => "Perda por cancelamento do pedido #{$pedidoBloqueado->id}: {$motivo}"]);
 
             $pedidoBloqueado->update([
                 'status' => StatusPedido::Cancelado,

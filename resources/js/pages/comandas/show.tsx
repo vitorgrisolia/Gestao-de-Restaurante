@@ -2,6 +2,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { precoPorPorcao, type DadosVenda } from '@/lib/venda';
 import { store as registrarPedido } from '@/routes/comandas/pedidos';
 import { index as salao } from '@/routes/salao';
 import { FechamentoCard } from './components/fechamento-card';
@@ -34,7 +35,17 @@ export default function ComandaShow({
                 ({ id }) => id === item.item_cardapio_id,
             );
 
-            return total + (produto?.preco_centavos ?? 0) * item.quantidade;
+            return (
+                total +
+                (produto
+                    ? precoPorPorcao(
+                          produto.tipo_venda,
+                          produto.preco_centavos,
+                          item,
+                      )
+                    : 0) *
+                    item.quantidade
+            );
         },
         0,
     );
@@ -69,7 +80,18 @@ export default function ComandaShow({
 
         formulario.setData('itens', [
             ...formulario.data.itens,
-            { item_cardapio_id: produtoId, quantidade: 1, observacao: '' },
+            {
+                item_cardapio_id: produtoId,
+                quantidade: 1,
+                observacao: '',
+                peso_gramas: '',
+                cobrar_excesso_carne: produtos.find(
+                    (produto) => produto.id === produtoId,
+                )?.permite_excesso_carne
+                    ? null
+                    : false,
+                adicional_carne: '',
+            },
         ]);
     }
 
@@ -79,6 +101,17 @@ export default function ComandaShow({
             formulario.data.itens.map((item) =>
                 item.item_cardapio_id === produtoId
                     ? { ...item, observacao }
+                    : item,
+            ),
+        );
+    }
+
+    function mudarVenda(produtoId: number, dados: Partial<DadosVenda>) {
+        formulario.setData(
+            'itens',
+            formulario.data.itens.map((item) =>
+                item.item_cardapio_id === produtoId
+                    ? { ...item, ...dados }
                     : item,
             ),
         );
@@ -144,6 +177,7 @@ export default function ComandaShow({
                                             )}
                                             onMudarQuantidade={mudarQuantidade}
                                             onMudarObservacao={mudarObservacao}
+                                            onMudarVenda={mudarVenda}
                                         />
                                     ))}
                                 </div>

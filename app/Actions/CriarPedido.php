@@ -14,8 +14,10 @@ use Illuminate\Validation\ValidationException;
 
 class CriarPedido
 {
+    public function __construct(private readonly CalcularPrecoItemPedido $calcularPreco) {}
+
     /**
-     * @param  list<array{item_cardapio_id: int, quantidade: int, observacao: string|null}>  $itens
+     * @param  list<array{item_cardapio_id: int, quantidade: int, observacao: string|null, peso_gramas?: int|null, cobrar_excesso_carne?: bool|null, adicional_carne_centavos?: int}>  $itens
      */
     public function handle(Comanda $comanda, User $usuario, array $itens, ?string $observacao): Pedido
     {
@@ -32,6 +34,7 @@ class CriarPedido
             $produtos = ItemCardapio::query()
                 ->whereKey($idsProdutos)
                 ->where('disponivel', true)
+                ->orderBy('id')
                 ->lockForUpdate()
                 ->get()
                 ->keyBy('id');
@@ -48,7 +51,7 @@ class CriarPedido
                 'observacao' => $observacao,
             ]);
 
-            foreach ($itens as $dadosItem) {
+            foreach ($itens as $indice => $dadosItem) {
                 $produto = $produtos->get($dadosItem['item_cardapio_id']);
 
                 if (! $produto instanceof ItemCardapio) {
@@ -57,12 +60,23 @@ class CriarPedido
                     ]);
                 }
 
+                $peso = $dadosItem['peso_gramas'] ?? null;
+                $cobrarExcesso = $dadosItem['cobrar_excesso_carne'] ?? null;
+                $adicional = $dadosItem['adicional_carne_centavos'] ?? 0;
+                $preco = $this->calcularPreco->handle($produto->tipo_venda, $produto->preco_centavos, $peso, $produto->permite_excesso_carne, $cobrarExcesso, $adicional, "itens.{$indice}.");
+
                 $pedido->itens()->create([
                     'item_cardapio_id' => $produto->id,
                     'setor_producao_id' => $produto->setor_producao_id,
                     'nome_item' => $produto->nome,
                     'quantidade' => $dadosItem['quantidade'],
-                    'preco_unitario_centavos' => $produto->preco_centavos,
+                    'preco_unitario_centavos' => $preco,
+                    'preco_referencia_centavos' => $produto->preco_centavos,
+                    'tipo_venda' => $produto->tipo_venda,
+                    'peso_gramas' => $peso,
+                    'permite_excesso_carne' => $produto->permite_excesso_carne,
+                    'cobrar_excesso_carne' => $cobrarExcesso ?? false,
+                    'adicional_carne_centavos' => $adicional,
                     'observacao' => $dadosItem['observacao'],
                     'status' => StatusItemPedido::Rascunho,
                 ]);

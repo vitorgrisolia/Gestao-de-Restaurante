@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\TipoVenda;
 use Database\Factories\ItemCardapioFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,14 +20,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $imagem
  * @property bool $disponivel
  * @property int $ordem
+ * @property TipoVenda $tipo_venda
+ * @property bool $permite_excesso_carne
  */
-#[Fillable(['categoria_cardapio_id', 'setor_producao_id', 'nome', 'descricao', 'preco_centavos', 'imagem', 'disponivel', 'ordem'])]
+#[Fillable(['categoria_cardapio_id', 'setor_producao_id', 'nome', 'descricao', 'preco_centavos', 'imagem', 'disponivel', 'ordem', 'tipo_venda', 'permite_excesso_carne'])]
 class ItemCardapio extends Model
 {
     /** @use HasFactory<ItemCardapioFactory> */
     use HasFactory;
 
     protected $table = 'itens_cardapio';
+
+    protected $attributes = ['tipo_venda' => 'unidade', 'permite_excesso_carne' => false];
 
     /** @return BelongsTo<CategoriaCardapio, $this> */
     public function categoria(): BelongsTo
@@ -59,6 +64,8 @@ class ItemCardapio extends Model
             'preco_centavos' => 'integer',
             'disponivel' => 'boolean',
             'ordem' => 'integer',
+            'tipo_venda' => TipoVenda::class,
+            'permite_excesso_carne' => 'boolean',
         ];
     }
 }

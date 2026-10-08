@@ -13,6 +13,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatarCentavos } from '@/lib/formatters';
+import { precoPorPorcao, unidadePreco, type DadosVenda } from '@/lib/venda';
+import { CamposVenda } from './campos-venda';
 import {
     destroy as removerItemPedido,
     update as atualizarItemPedido,
@@ -83,13 +85,20 @@ function PedidoCard({ pedido }: { pedido: Pedido }) {
 }
 
 function ItemEditavel({ item }: { item: ItemPedido }) {
-    const formulario = useForm<{
-        quantidade: number;
-        observacao: string;
-        item?: string;
-    }>({
+    const formulario = useForm<
+        DadosVenda & {
+            quantidade: number;
+            observacao: string;
+            item?: string;
+        }
+    >({
         quantidade: item.quantidade,
         observacao: item.observacao ?? '',
+        peso_gramas: item.peso_gramas?.toString() ?? '',
+        cobrar_excesso_carne: item.cobrar_excesso_carne,
+        adicional_carne: item.adicional_carne_centavos
+            ? (item.adicional_carne_centavos / 100).toFixed(2)
+            : '',
     });
 
     function salvar(event: React.FormEvent<HTMLFormElement>) {
@@ -114,7 +123,12 @@ function ItemEditavel({ item }: { item: ItemPedido }) {
     }
 
     const subtotalCentavos =
-        formulario.data.quantidade * item.preco_unitario_centavos;
+        formulario.data.quantidade *
+        precoPorPorcao(
+            item.tipo_venda,
+            item.preco_referencia_centavos ?? item.preco_unitario_centavos,
+            formulario.data,
+        );
 
     return (
         <form className="grid gap-3 border-b pb-3" onSubmit={salvar}>
@@ -122,9 +136,20 @@ function ItemEditavel({ item }: { item: ItemPedido }) {
                 <div>
                     <p className="text-sm font-medium">{item.nome_item}</p>
                     <p className="text-xs text-muted-foreground">
-                        {formatarCentavos(item.preco_unitario_centavos)} por
-                        unidade
+                        {formatarCentavos(
+                            item.preco_referencia_centavos ??
+                                item.preco_unitario_centavos,
+                        )}
+                        {unidadePreco(item.tipo_venda)}
                     </p>
+                    {item.permite_excesso_carne && (
+                        <p className="text-xs text-muted-foreground">
+                            Excesso de carne registrado:{' '}
+                            {item.cobrar_excesso_carne
+                                ? `${formatarCentavos(item.adicional_carne_centavos)} por porção/pessoa`
+                                : 'não cobrado'}
+                        </p>
+                    )}
                 </div>
                 <strong className="text-sm whitespace-nowrap">
                     {formatarCentavos(subtotalCentavos)}
@@ -161,6 +186,16 @@ function ItemEditavel({ item }: { item: ItemPedido }) {
                     />
                 </div>
             </div>
+            <CamposVenda
+                id={`item-${item.id}`}
+                tipo={item.tipo_venda}
+                permiteExcesso={item.permite_excesso_carne}
+                dados={formulario.data}
+                onChange={(dados) =>
+                    formulario.setData({ ...formulario.data, ...dados })
+                }
+                errors={formulario.errors}
+            />
             <InputError
                 message={
                     formulario.errors.quantidade ??
@@ -204,6 +239,20 @@ function ItemSomenteLeitura({ item }: { item: ItemPedido }) {
             {item.observacao && (
                 <p className="text-xs text-muted-foreground">
                     {item.observacao}
+                </p>
+            )}
+            {item.peso_gramas !== null && (
+                <p className="text-xs text-muted-foreground">
+                    {item.peso_gramas} g por porção ·{' '}
+                    {formatarCentavos(item.preco_referencia_centavos ?? 0)}/kg
+                </p>
+            )}
+            {item.permite_excesso_carne && (
+                <p className="text-xs text-muted-foreground">
+                    Excesso de carne:{' '}
+                    {item.cobrar_excesso_carne
+                        ? `${formatarCentavos(item.adicional_carne_centavos)} por porção/pessoa`
+                        : 'não cobrado'}
                 </p>
             )}
             {item.status === 'cancelado' && item.motivo_cancelamento && (

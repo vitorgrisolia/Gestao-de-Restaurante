@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\StatusItemPedido;
+use App\TipoVenda;
 use Database\Factories\PedidoItemFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,6 +19,12 @@ use Illuminate\Support\Carbon;
  * @property string $nome_item
  * @property int $quantidade
  * @property int $preco_unitario_centavos
+ * @property TipoVenda $tipo_venda
+ * @property int|null $preco_referencia_centavos
+ * @property int|null $peso_gramas
+ * @property bool $permite_excesso_carne
+ * @property bool $cobrar_excesso_carne
+ * @property int $adicional_carne_centavos
  * @property string|null $observacao
  * @property StatusItemPedido $status
  * @property Carbon|null $enviado_em
@@ -31,13 +38,15 @@ use Illuminate\Support\Carbon;
  * @property string|null $motivo_cancelamento
  * @property Carbon|null $cancelado_em
  */
-#[Fillable(['pedido_id', 'item_cardapio_id', 'setor_producao_id', 'nome_item', 'quantidade', 'preco_unitario_centavos', 'observacao', 'status', 'enviado_em', 'iniciado_em', 'iniciado_por_id', 'pronto_em', 'pronto_por_id', 'entregue_em', 'entregue_por_id', 'cancelado_por_id', 'motivo_cancelamento', 'cancelado_em'])]
+#[Fillable(['pedido_id', 'item_cardapio_id', 'setor_producao_id', 'nome_item', 'quantidade', 'preco_unitario_centavos', 'observacao', 'status', 'enviado_em', 'iniciado_em', 'iniciado_por_id', 'pronto_em', 'pronto_por_id', 'entregue_em', 'entregue_por_id', 'cancelado_por_id', 'motivo_cancelamento', 'cancelado_em', 'tipo_venda', 'preco_referencia_centavos', 'peso_gramas', 'permite_excesso_carne', 'cobrar_excesso_carne', 'adicional_carne_centavos'])]
 class PedidoItem extends Model
 {
     /** @use HasFactory<PedidoItemFactory> */
     use HasFactory;
 
     protected $table = 'pedido_itens';
+
+    protected $attributes = ['tipo_venda' => 'unidade', 'permite_excesso_carne' => false, 'cobrar_excesso_carne' => false, 'adicional_carne_centavos' => 0];
 
     /** @return BelongsTo<Pedido, $this> */
     public function pedido(): BelongsTo
@@ -92,6 +101,12 @@ class PedidoItem extends Model
         return [
             'quantidade' => 'integer',
             'preco_unitario_centavos' => 'integer',
+            'tipo_venda' => TipoVenda::class,
+            'preco_referencia_centavos' => 'integer',
+            'peso_gramas' => 'integer',
+            'permite_excesso_carne' => 'boolean',
+            'cobrar_excesso_carne' => 'boolean',
+            'adicional_carne_centavos' => 'integer',
             'status' => StatusItemPedido::class,
             'enviado_em' => 'datetime',
             'iniciado_em' => 'datetime',

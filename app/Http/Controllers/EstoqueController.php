@@ -26,7 +26,7 @@ class EstoqueController extends Controller
             'itensCardapio' => ItemCardapio::query()->with('fichaTecnica.ingrediente.unidadeMedida')->orderBy('nome')->get(),
             'inventarioAberto' => $inventario,
             'movimentacoes' => MovimentacaoEstoque::query()->with(['ingrediente.unidadeMedida', 'usuario'])->latest('registrada_em')->limit(30)->get(),
-            'resumo' => ['itens_ativos' => $ingredientes->where('ativo', true)->count(), 'abaixo_minimo' => $ingredientes->filter(fn (Ingrediente $i) => $i->estoque_atual <= $i->estoque_minimo)->count(), 'valor_estoque_centavos' => $ingredientes->sum(fn (Ingrediente $i) => (int) round($i->estoque_atual * $i->custo_medio_centavos))],
+            'resumo' => ['itens_ativos' => $ingredientes->where('ativo', true)->count(), 'abaixo_minimo' => $ingredientes->where('ativo', true)->filter(fn (Ingrediente $i) => $i->estoque_atual <= $i->estoque_minimo)->count(), 'valor_estoque_centavos' => $ingredientes->sum(fn (Ingrediente $i) => (int) round($i->estoque_atual * $i->custo_medio_centavos))],
         ]);
     }
 }

@@ -11,6 +11,12 @@
 Mesa: {{ $impressao->pedido->comanda->mesa->numero }}<br>Emissão: {{ $impressao->solicitada_em->format('d/m/Y H:i') }}<br>Via: {{ $impressao->sequencia }} ({{ $impressao->tipo }})<div class="linha"></div>
 @foreach ($impressao->pedido->itens as $item)
 <div><strong>{{ $item->quantidade }}x {{ $item->nome_item }}</strong></div>
+@if ($item->peso_gramas !== null)
+<div>{{ $item->peso_gramas }} g por porção</div>
+@endif
+@if ($item->cobrar_excesso_carne)
+<div>Excesso de carne: R$ {{ number_format($item->adicional_carne_centavos / 100, 2, ',', '.') }} por porção/pessoa</div>
+@endif
 @if ($item->observacao)
 <div class="obs">OBS: {{ $item->observacao }}</div>
 @endif

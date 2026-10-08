@@ -45,7 +45,7 @@ class ItemCardapioController extends Controller
     {
         return [
             ...$request->safe()->only([
-                'categoria_cardapio_id', 'setor_producao_id', 'nome', 'descricao', 'imagem', 'disponivel', 'ordem',
+                'categoria_cardapio_id', 'setor_producao_id', 'nome', 'descricao', 'imagem', 'disponivel', 'ordem', 'tipo_venda', 'permite_excesso_carne',
             ]),
             'preco_centavos' => (int) round($request->float('preco') * 100),
         ];

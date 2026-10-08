@@ -20,6 +20,7 @@ class PedidoItemController extends Controller
             $pedidoItem,
             $request->integer('quantidade'),
             $request->observacaoItem(),
+            $request->dadosVenda(),
         );
 
         return back()->with('success', 'Item atualizado com sucesso.');

@@ -22,7 +22,7 @@ class ConcluirInventario
                 throw ValidationException::withMessages(['inventario' => 'Este inventário já foi concluído.']);
             }
 
-            foreach ($inventarioBloqueado->itens()->get() as $item) {
+            foreach ($inventarioBloqueado->itens()->orderBy('ingrediente_id')->get() as $item) {
                 $contada = $contagens[$item->id] ?? null;
 
                 if ($contada === null || $contada < 0) {
@@ -30,10 +30,7 @@ class ConcluirInventario
                 }
 
                 $ingrediente = Ingrediente::query()->lockForUpdate()->findOrFail($item->ingrediente_id);
-                if (round((float) $ingrediente->estoque_atual, 3) !== round((float) $item->quantidade_sistema, 3)) {
-                    throw ValidationException::withMessages(['inventario' => 'O estoque mudou durante a contagem. Atualize a contagem antes de concluir o inventário.']);
-                }
-                $diferenca = round($contada - (float) $ingrediente->estoque_atual, 3);
+                $diferenca = round($contada - (float) $item->quantidade_sistema, 3);
 
                 if ($diferenca !== 0.0) {
                     $this->movimentarEstoque->handle($ingrediente, $usuario, 'inventario', $diferenca, "Inventário #{$inventarioBloqueado->id}", chaveIdempotencia: "inventario:{$inventarioBloqueado->id}:ingrediente:{$ingrediente->id}");

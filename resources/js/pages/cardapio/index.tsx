@@ -23,6 +23,8 @@ import { store as cadastrarCategoria } from '@/routes/categorias-cardapio';
 import { index as cardapio } from '@/routes/cardapio';
 import { store as cadastrarItem } from '@/routes/itens-cardapio';
 import { AcoesCategoria, AcoesItem } from './components/crud-actions';
+import { ModalidadeVenda } from './components/modalidade-venda';
+import { unidadePreco, type TipoVenda } from '@/lib/venda';
 
 export type ItemCardapio = {
     id: number;
@@ -30,6 +32,8 @@ export type ItemCardapio = {
     nome: string;
     descricao: string | null;
     preco_centavos: number;
+    tipo_venda: TipoVenda;
+    permite_excesso_carne: boolean;
     imagem: string | null;
     disponivel: boolean;
     ordem: number;
@@ -205,7 +209,7 @@ export default function CardapioIndex({
                                                 <Campo
                                                     id="item-preco"
                                                     name="preco"
-                                                    label="Preço (R$)"
+                                                    label="Preço por unidade, pessoa ou kg (R$)"
                                                     type="number"
                                                     min="0.01"
                                                     step="0.01"
@@ -215,6 +219,9 @@ export default function CardapioIndex({
                                             </div>
 
                                             <div className="grid gap-2">
+                                                <ModalidadeVenda
+                                                    errors={errors}
+                                                />
                                                 <Label htmlFor="item-descricao">
                                                     Descrição
                                                 </Label>
@@ -456,6 +463,9 @@ export default function CardapioIndex({
                                                         {moeda.format(
                                                             item.preco_centavos /
                                                                 100,
+                                                        )}
+                                                        {unidadePreco(
+                                                            item.tipo_venda,
                                                         )}
                                                     </strong>
                                                     <AcoesItem

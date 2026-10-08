@@ -34,11 +34,13 @@ type Movimento = {
 type ItemInventario = {
     id: number;
     quantidade_sistema: string;
+    quantidade_contada: string | null;
     ingrediente: Ingrediente;
 };
 type ItemCardapio = {
     id: number;
     nome: string;
+    tipo_venda: 'unidade' | 'peso' | 'pessoa';
     ficha_tecnica: {
         ingrediente_id: number;
         quantidade: string;
@@ -95,7 +97,7 @@ export default function EstoqueIndex({
     const contagem = useForm({
         itens: (inventarioAberto?.itens ?? []).map((item) => ({
             id: item.id,
-            quantidade_contada: item.quantidade_sistema,
+            quantidade_contada: item.quantidade_contada ?? '',
         })),
     });
     return (
@@ -410,6 +412,11 @@ export default function EstoqueIndex({
                                     );
                                 }}
                             >
+                                <p>
+                                    Informe as quantidades referentes ao início
+                                    da contagem. Movimentos posteriores serão
+                                    preservados no ajuste.
+                                </p>
                                 {inventarioAberto.itens.map((item, index) => (
                                     <div
                                         key={item.id}
@@ -457,11 +464,25 @@ export default function EstoqueIndex({
                                     </div>
                                 ))}
                                 <Button>Concluir e ajustar saldos</Button>
-                                <Button type="button" variant="outline" onClick={() => {
-                                    if (window.confirm('Atualizar os saldos de referência? Será necessário refazer a contagem física.')) {
-                                        router.post(`/inventarios/${inventarioAberto.id}/recontagem`, {}, { preserveState: false });
-                                    }
-                                }}>Reiniciar contagem com saldos atuais</Button>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => {
+                                        if (
+                                            window.confirm(
+                                                'Atualizar somente os ingredientes com saldo alterado? Será necessário recontar esses ingredientes; os demais serão preservados.',
+                                            )
+                                        ) {
+                                            router.post(
+                                                `/inventarios/${inventarioAberto.id}/recontagem`,
+                                                { itens: contagem.data.itens },
+                                                { preserveState: false },
+                                            );
+                                        }
+                                    }}
+                                >
+                                    Recontar ingredientes com saldo alterado
+                                </Button>
                             </form>
                         )}
                     </CardContent>
@@ -527,10 +548,19 @@ export default function EstoqueIndex({
 
 function ErrosEstoque() {
     const { errors } = usePage().props;
-    if (Object.keys(errors).length === 0) { return null; }
-    return <div role="alert" className="m-4 rounded-md border border-destructive p-4 text-sm text-destructive">
-        {Object.entries(errors).map(([campo, mensagem]) => <p key={campo}>{mensagem}</p>)}
-    </div>;
+    if (Object.keys(errors).length === 0) {
+        return null;
+    }
+    return (
+        <div
+            role="alert"
+            className="m-4 rounded-md border border-destructive p-4 text-sm text-destructive"
+        >
+            {Object.entries(errors).map(([campo, mensagem]) => (
+                <p key={campo}>{mensagem}</p>
+            ))}
+        </div>
+    );
 }
 function Resumo({ titulo, valor }: { titulo: string; valor: string | number }) {
     return (
@@ -569,6 +599,13 @@ function FichaTecnica({
             }}
         >
             <b>{item.nome}</b>
+            <p className="text-xs text-muted-foreground">
+                Informe os ingredientes necessários{' '}
+                {item.tipo_venda === 'peso'
+                    ? 'para 1 kg do alimento vendido'
+                    : 'por unidade ou pessoa'}
+                . O pedido aplica a proporção automaticamente.
+            </p>
             {ficha.data.ingredientes.map((linha, index) => (
                 <div
                     key={index}

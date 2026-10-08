@@ -14,7 +14,6 @@ use App\Models\User;
 use App\PapelUsuario;
 use App\StatusItemPedido;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class CorrecoesEstoqueTest extends TestCase
@@ -83,15 +82,10 @@ class CorrecoesEstoqueTest extends TestCase
         $inventario = Inventario::create(['iniciado_por_id' => $usuario->id, 'status' => 'aberto', 'iniciado_em' => now()]);
         $item = $inventario->itens()->create(['ingrediente_id' => $ingrediente->id, 'quantidade_sistema' => 10]);
 
-        try {
-            app(ConcluirInventario::class)->handle($inventario, $usuario, [$item->id => 9]);
-            $this->fail('O inventário deveria recusar uma contagem desatualizada.');
-        } catch (ValidationException $exception) {
-            $this->assertArrayHasKey('inventario', $exception->errors());
-        }
+        app(ConcluirInventario::class)->handle($inventario, $usuario, [$item->id => 9]);
 
-        $this->assertSame('8.000', $ingrediente->fresh()->estoque_atual);
-        $this->assertSame('aberto', $inventario->fresh()->status);
+        $this->assertSame('7.000', $ingrediente->fresh()->estoque_atual);
+        $this->assertSame('concluido', $inventario->fresh()->status);
     }
 
     public function test_recontagem_atualiza_referencia_sem_alterar_estoque(): void

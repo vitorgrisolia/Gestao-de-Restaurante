@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ImpressaoProducao;
+use App\StatusItemPedido;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -12,7 +13,7 @@ class CupomTermicoController extends Controller
     public function show(Request $request, ImpressaoProducao $impressao): View
     {
         abort_unless($request->user()?->papel->podeOperarProducao() ?? false, 403);
-        $impressao->load(['pedido.comanda.mesa', 'pedido.itens' => fn ($q) => $q->where('setor_producao_id', $impressao->setor_producao_id), 'setorProducao', 'solicitadaPor']);
+        $impressao->load(['pedido.comanda.mesa', 'pedido.itens' => fn ($q) => $q->where('setor_producao_id', $impressao->setor_producao_id)->where('status', '!=', StatusItemPedido::Cancelado), 'setorProducao', 'solicitadaPor']);
 
         return view('impressoes.cupom-termico', ['impressao' => $impressao]);
     }

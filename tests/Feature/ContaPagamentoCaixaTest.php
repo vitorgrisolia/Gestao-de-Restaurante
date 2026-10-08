@@ -9,10 +9,10 @@ class ContaPagamentoCaixaTest extends TestCase
     /**
      * A basic feature test example.
      */
-    public function test_example(): void
+    public function test_inicio_redireciona_para_visao_geral(): void
     {
         $response = $this->get('/');
 
-        $response->assertStatus(200);
+        $response->assertRedirect(route('dashboard'));
     }
 }

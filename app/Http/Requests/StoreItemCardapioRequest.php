@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\TipoVenda;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -38,6 +39,8 @@ class StoreItemCardapioRequest extends FormRequest
             'imagem' => ['nullable', 'url:http,https', 'max:2048'],
             'disponivel' => ['required', 'boolean'],
             'ordem' => ['required', 'integer', 'min:0', 'max:999'],
+            'tipo_venda' => ['sometimes', 'required', Rule::enum(TipoVenda::class)],
+            'permite_excesso_carne' => ['sometimes', 'required', 'boolean'],
         ];
     }
 

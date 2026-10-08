@@ -28,6 +28,7 @@ import {
     update as atualizarItem,
 } from '@/routes/itens-cardapio';
 import type { Categoria, ItemCardapio, SetorProducao } from '../index';
+import { ModalidadeVenda } from './modalidade-venda';
 
 export function AcoesCategoria({ categoria }: { categoria: Categoria }) {
     function excluir() {
@@ -182,7 +183,7 @@ export function AcoesItem({
                                     />
                                     <Campo
                                         name="preco"
-                                        label="Preço (R$)"
+                                        label="Preço por unidade, pessoa ou kg (R$)"
                                         type="number"
                                         min="0.01"
                                         step="0.01"
@@ -192,6 +193,11 @@ export function AcoesItem({
                                         error={errors.preco}
                                     />
                                 </div>
+                                <ModalidadeVenda
+                                    tipo={item.tipo_venda}
+                                    permiteExcesso={item.permite_excesso_carne}
+                                    errors={errors}
+                                />
                                 <CampoTexto
                                     name="descricao"
                                     label="Descrição"

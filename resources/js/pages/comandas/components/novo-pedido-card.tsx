@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { formatarCentavos } from '@/lib/formatters';
+import { precoPorPorcao } from '@/lib/venda';
 import type { ItemNovoPedido, Produto } from '../types';
 
 export type NovoPedidoForm = {
@@ -69,8 +70,11 @@ export function NovoPedidoCard({
                                         </span>
                                         <strong>
                                             {formatarCentavos(
-                                                produto.preco_centavos *
-                                                    item.quantidade,
+                                                precoPorPorcao(
+                                                    produto.tipo_venda,
+                                                    produto.preco_centavos,
+                                                    item,
+                                                ) * item.quantidade,
                                             )}
                                         </strong>
                                     </div>
@@ -90,7 +94,9 @@ export function NovoPedidoCard({
                             className="resize-none rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                         />
                     </div>
-                    <InputError message={errors.itens ?? errors.comanda} />
+                    {Object.entries(errors).map(([campo, mensagem]) => (
+                        <InputError key={campo} message={mensagem} />
+                    ))}
                     <div className="flex justify-between border-t pt-4 font-semibold">
                         <span>Total</span>
                         <span>{formatarCentavos(totalCentavos)}</span>

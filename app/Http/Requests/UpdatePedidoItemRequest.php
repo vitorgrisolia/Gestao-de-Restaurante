@@ -25,6 +25,9 @@ class UpdatePedidoItemRequest extends FormRequest
         return [
             'quantidade' => ['required', 'integer', 'min:1', 'max:99'],
             'observacao' => ['nullable', 'string', 'max:500'],
+            'peso_gramas' => ['nullable', 'integer', 'min:1', 'max:10000'],
+            'cobrar_excesso_carne' => ['nullable', 'boolean'],
+            'adicional_carne' => ['nullable', 'numeric', 'decimal:0,2', 'min:0', 'max:99999.99'],
         ];
     }
 
@@ -43,5 +46,23 @@ class UpdatePedidoItemRequest extends FormRequest
         $observacao = $this->validated('observacao');
 
         return filled($observacao) ? trim((string) $observacao) : null;
+    }
+
+    /** @return array{peso_gramas?: int|null, cobrar_excesso_carne?: bool|null, adicional_carne_centavos?: int} */
+    public function dadosVenda(): array
+    {
+        $dados = $this->validated();
+        $venda = [];
+        if (array_key_exists('peso_gramas', $dados)) {
+            $venda['peso_gramas'] = $dados['peso_gramas'] !== null ? (int) $dados['peso_gramas'] : null;
+        }
+        if (array_key_exists('cobrar_excesso_carne', $dados)) {
+            $venda['cobrar_excesso_carne'] = $dados['cobrar_excesso_carne'] !== null ? (bool) $dados['cobrar_excesso_carne'] : null;
+        }
+        if (array_key_exists('adicional_carne', $dados)) {
+            $venda['adicional_carne_centavos'] = (int) round((float) ($dados['adicional_carne'] ?? 0) * 100);
+        }
+
+        return $venda;
     }
 }

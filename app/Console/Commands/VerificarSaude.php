@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Actions\ConsultarBackupVerificado;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Throwable;
 
 class VerificarSaude extends Command
@@ -13,7 +13,7 @@ class VerificarSaude extends Command
 
     protected $description = 'Verifica banco, armazenamento, fila e atualização dos backups';
 
-    public function handle(): int
+    public function handle(ConsultarBackupVerificado $consultarBackup): int
     {
         $falhas = [];
         try {
@@ -27,10 +27,14 @@ class VerificarSaude extends Command
         }
 
         if (config('database.default') === 'sqlite') {
-            $ultimo = collect(File::glob(storage_path('app/private/backups/*.sqlite')))->sortDesc()->first();
+            $ultimo = $consultarBackup->handle();
             if (! $ultimo || filemtime($ultimo) < now()->subDay()->timestamp) {
                 $falhas[] = 'Nenhum backup criado nas últimas 24 horas';
             }
+        }
+
+        if (config('database.default') !== 'sqlite') {
+            $falhas[] = 'Backup externo não verificado. Configure a verificação do banco utilizado.';
         }
 
         $falhasFila = DB::getSchemaBuilder()->hasTable('failed_jobs') ? DB::table('failed_jobs')->count() : 0;

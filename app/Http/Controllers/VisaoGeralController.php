@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\CalcularContaComanda;
+use App\Actions\ConsultarBackupVerificado;
+use App\EstadoMesa;
 use App\Models\Caixa;
 use App\Models\CategoriaCardapio;
 use App\Models\Comanda;
@@ -15,45 +18,51 @@ use App\Models\PedidoItem;
 use App\Models\SetorProducao;
 use App\Models\User;
 use App\PapelUsuario;
+use App\StatusItemPedido;
+use App\StatusPedido;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class VisaoGeralController extends Controller
 {
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request, ConsultarBackupVerificado $consultarBackup, CalcularContaComanda $calcularConta): Response
     {
         $papel = $request->user()->papel;
         $secoes = [];
+        $comandas = ($papel->podeAbrirComanda() || $papel->podeReceberPagamento())
+            ? Comanda::query()->where('ativa', true)->with(['pedidos.itens', 'pagamentos'])->get()
+            : collect();
 
         if ($papel->podeAbrirComanda()) {
             $secoes[] = $this->secao('salao', 'Salão e comandas', 'Ocupação atual e atendimentos em andamento.', 'salao.index', [
-                'Mesas livres' => Mesa::query()->where('estado', 'livre')->count(),
-                'Mesas ocupadas' => Mesa::query()->whereIn('estado', ['ocupada', 'aguardando_pagamento'])->count(),
-                'Comandas abertas' => Comanda::query()->where('ativa', true)->count(),
-                'Pedidos em rascunho' => Pedido::query()->where('status', 'rascunho')->whereHas('comanda', fn ($query) => $query->where('ativa', true))->count(),
+                'Mesas livres' => Mesa::query()->where('estado', EstadoMesa::Livre)->count(),
+                'Mesas ocupadas' => Mesa::query()->whereIn('estado', [EstadoMesa::Ocupada, EstadoMesa::AguardandoPagamento])->count(),
+                'Comandas abertas' => $comandas->count(),
+                'Pedidos em rascunho' => Pedido::query()->where('status', StatusPedido::Rascunho)->whereHas('comanda', fn ($query) => $query->where('ativa', true))->count(),
             ]);
         }
 
         if ($papel->podeOperarProducao()) {
             $secoes[] = $this->secao('producao', 'Produção', 'Os indicadores representam itens de pedido.', 'producao.index', [
-                'Recebidos' => PedidoItem::query()->where('status', 'enviado')->count(),
-                'Em preparo' => PedidoItem::query()->where('status', 'em_preparo')->count(),
-                'Prontos' => PedidoItem::query()->where('status', 'pronto')->count(),
-                'Recebidos há mais de 15 min' => PedidoItem::query()->where('status', 'enviado')->where('enviado_em', '<', now()->subMinutes(15))->count(),
-                'Entregues hoje' => PedidoItem::query()->where('status', 'entregue')->whereDate('entregue_em', today())->count(),
+                'Recebidos' => PedidoItem::query()->where('status', StatusItemPedido::Enviado)->count(),
+                'Em preparo' => PedidoItem::query()->where('status', StatusItemPedido::EmPreparo)->count(),
+                'Prontos' => PedidoItem::query()->where('status', StatusItemPedido::Pronto)->count(),
+                'Recebidos há mais de 15 min' => PedidoItem::query()->where('status', StatusItemPedido::Enviado)->where('enviado_em', '<', now()->subMinutes(15))->count(),
+                'Entregues hoje' => PedidoItem::query()->where('status', StatusItemPedido::Entregue)->whereDate('entregue_em', today())->count(),
             ]);
         }
 
         if ($papel->podeReceberPagamento()) {
-            $recebido = (int) Pagamento::query()->whereNull('estornado_em')->whereDate('pago_em', today())->sum('valor_centavos');
+            $pagamentos = Pagamento::query()->whereNull('estornado_em')->whereDate('pago_em', today())
+                ->selectRaw('COUNT(*) as quantidade, COALESCE(SUM(valor_centavos), 0) as total')->toBase()->first();
+            $recebido = (int) $pagamentos->total;
             $secoes[] = $this->secao('caixa', 'Conta e caixa', 'Pagamentos recebidos hoje, sem os estornados.', 'caixas.index', [
                 'Situação do caixa' => Caixa::query()->where('aberto', true)->exists() ? 'Aberto' : 'Fechado — abra para receber',
                 'Recebido hoje' => $this->dinheiro($recebido),
-                'Pagamentos hoje' => Pagamento::query()->whereNull('estornado_em')->whereDate('pago_em', today())->count(),
-                'Comandas a receber' => Comanda::query()->where('ativa', true)->count(),
+                'Pagamentos hoje' => (int) $pagamentos->quantidade,
+                'Comandas a receber' => $comandas->filter(fn (Comanda $comanda): bool => $calcularConta->handle($comanda)['saldo'] > 0)->count(),
             ]);
         }
 
@@ -80,12 +89,12 @@ class VisaoGeralController extends Controller
                 $usuarios[$papelUsuario->nome()] = User::query()->where('papel', $papelUsuario->value)->count();
             }
             $secoes[] = $this->secao('usuarios', 'Usuários', 'Equipe cadastrada por função.', 'usuarios.index', $usuarios);
-            $backups = collect(File::glob(storage_path('app/private/backups/*.sqlite')))->sortDesc();
-            $ultimo = $backups->first();
+            $usaSqlite = config('database.default') === 'sqlite';
+            $ultimo = $usaSqlite ? $consultarBackup->handle() : null;
             $data = $ultimo ? filemtime($ultimo) : false;
             $secoes[] = $this->secao('infraestrutura', 'Infraestrutura', 'Fila e backups locais. Consulte o monitoramento para detalhes.', 'monitoramento.show', [
                 'Trabalhos com falha' => DB::table('failed_jobs')->count(),
-                'Último backup local' => $data !== false ? date('d/m/Y H:i', $data) : 'Nenhum backup local encontrado',
+                'Último backup local' => ! $usaSqlite ? 'Não se aplica — backup externo não verificado' : ($data !== false ? date('d/m/Y H:i', $data) : 'Nenhum backup local válido encontrado'),
             ]);
         }
 
